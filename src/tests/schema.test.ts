@@ -304,7 +304,6 @@ describe('columns', () => {
     s = addTable(s, 'posts', { x: 100, y: 0 })
 
     const table1Id = s.tables[0].id
-    const table2Id = s.tables[1].id
 
     s = addColumn(s, table1Id, {
       name: 'email',
