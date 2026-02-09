@@ -371,6 +371,10 @@ export function generateJunctionTable(
   };
   result = addColumn(result, junctionTable.id, fkCol1);
 
+  // Grab the just-added FK column (last in the list)
+  const afterFk1 = getTable(result, junctionTable.id)!;
+  const jCol1 = afterFk1.columns[afterFk1.columns.length - 1];
+
   const fkCol2: Omit<Column, "id"> = {
     name: `${targetTable.name}_id`,
     type: targetPk.type,
@@ -378,10 +382,8 @@ export function generateJunctionTable(
   };
   result = addColumn(result, junctionTable.id, fkCol2);
 
-  // Get the created columns
-  const updatedJunction = getTable(result, junctionTable.id)!;
-  const jCol1 = updatedJunction.columns[0];
-  const jCol2 = updatedJunction.columns[1];
+  const afterFk2 = getTable(result, junctionTable.id)!;
+  const jCol2 = afterFk2.columns[afterFk2.columns.length - 1];
 
   // Add relationships from junction to both tables
   result = addRelationship(result, {

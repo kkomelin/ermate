@@ -22,13 +22,9 @@ function schemaWithTable() {
 }
 
 function schemaWithTableAndColumn() {
-  const s = schemaWithTable();
-  const tableId = s.tables[0].id;
-  return addColumn(s, tableId, {
-    name: "id",
-    type: ColumnType.INTEGER,
-    constraints: [ColumnConstraint.PRIMARY_KEY, ColumnConstraint.NOT_NULL],
-  });
+  // addTable already creates default columns (id, created_at, updated_at),
+  // so the table already has a PK column out of the box.
+  return schemaWithTable();
 }
 
 // ---------------------------------------------------------------------------
@@ -48,7 +44,14 @@ describe("tables", () => {
     expect(s.tables).toHaveLength(1);
     expect(s.tables[0].name).toBe("users");
     expect(s.tables[0].position).toEqual({ x: 0, y: 0 });
-    expect(s.tables[0].columns).toEqual([]);
+    // addTable creates default columns: id (PK), created_at, updated_at
+    expect(s.tables[0].columns).toHaveLength(3);
+    expect(s.tables[0].columns[0].name).toBe("id");
+    expect(s.tables[0].columns[0].constraints).toContain(
+      ColumnConstraint.PRIMARY_KEY,
+    );
+    expect(s.tables[0].columns[1].name).toBe("created_at");
+    expect(s.tables[0].columns[2].name).toBe("updated_at");
   });
 
   it("does not mutate the original schema", () => {
@@ -117,16 +120,23 @@ describe("tables", () => {
 
 describe("columns", () => {
   it("adds a column to a table", () => {
-    const s = schemaWithTableAndColumn();
-    const table = s.tables[0];
-    expect(table.columns).toHaveLength(1);
-    expect(table.columns[0].name).toBe("id");
-    expect(table.columns[0].type).toBe(ColumnType.INTEGER);
-    expect(table.columns[0].constraints).toContain(ColumnConstraint.PRIMARY_KEY);
+    const s = schemaWithTable();
+    const tableId = s.tables[0].id;
+    const updated = addColumn(s, tableId, {
+      name: "email",
+      type: ColumnType.VARCHAR,
+      constraints: [ColumnConstraint.NOT_NULL],
+    });
+    const table = updated.tables[0];
+    // 3 default columns + 1 added
+    expect(table.columns).toHaveLength(4);
+    expect(table.columns[3].name).toBe("email");
+    expect(table.columns[3].type).toBe(ColumnType.VARCHAR);
+    expect(table.columns[3].constraints).toContain(ColumnConstraint.NOT_NULL);
   });
 
   it("enforces single primary key on add", () => {
-    let s = schemaWithTableAndColumn();
+    let s = schemaWithTable();
     const tableId = s.tables[0].id;
 
     s = addColumn(s, tableId, {
@@ -136,13 +146,14 @@ describe("columns", () => {
     });
 
     const table = s.tables[0];
-    expect(table.columns).toHaveLength(2);
-    // First column should have PK stripped
+    // 3 default + 1 added
+    expect(table.columns).toHaveLength(4);
+    // Default id column should have PK stripped
     expect(table.columns[0].constraints).not.toContain(
       ColumnConstraint.PRIMARY_KEY,
     );
-    // Second column should have PK
-    expect(table.columns[1].constraints).toContain(
+    // New uuid column should have PK
+    expect(table.columns[3].constraints).toContain(
       ColumnConstraint.PRIMARY_KEY,
     );
   });
@@ -162,17 +173,18 @@ describe("columns", () => {
   });
 
   it("enforces single primary key on update", () => {
-    let s = schemaWithTableAndColumn();
+    let s = schemaWithTable();
     const tableId = s.tables[0].id;
 
-    // Add a second column without PK
+    // Add an email column without PK
     s = addColumn(s, tableId, {
       name: "email",
       type: ColumnType.VARCHAR,
       constraints: [ColumnConstraint.NOT_NULL],
     });
 
-    const emailColId = s.tables[0].columns[1].id;
+    // Email is the last column (after 3 defaults)
+    const emailColId = s.tables[0].columns[3].id;
 
     // Update email to be PK
     s = updateColumn(s, tableId, emailColId, {
@@ -180,23 +192,24 @@ describe("columns", () => {
     });
 
     const table = s.tables[0];
-    // First column should lose PK
+    // Default id column should lose PK
     expect(table.columns[0].constraints).not.toContain(
       ColumnConstraint.PRIMARY_KEY,
     );
     // Email column should have PK
-    expect(table.columns[1].constraints).toContain(
+    expect(table.columns[3].constraints).toContain(
       ColumnConstraint.PRIMARY_KEY,
     );
   });
 
   it("removes a column", () => {
-    const s = schemaWithTableAndColumn();
+    const s = schemaWithTable();
     const tableId = s.tables[0].id;
     const colId = s.tables[0].columns[0].id;
 
     const updated = removeColumn(s, tableId, colId);
-    expect(updated.tables[0].columns).toHaveLength(0);
+    // 3 default columns - 1 removed = 2
+    expect(updated.tables[0].columns).toHaveLength(2);
   });
 
   it("removes relationships referencing a deleted column", () => {
@@ -303,13 +316,26 @@ describe("validate", () => {
   });
 
   it("warns about tables without a primary key", () => {
-    let s = schemaWithTable();
-    const tableId = s.tables[0].id;
-    s = addColumn(s, tableId, {
-      name: "email",
-      type: ColumnType.VARCHAR,
-      constraints: [],
-    });
+    // Construct a table manually without a PK column
+    const s: Schema = {
+      version: 1,
+      tables: [
+        {
+          id: "t1",
+          name: "users",
+          position: { x: 0, y: 0 },
+          columns: [
+            {
+              id: "c1",
+              name: "email",
+              type: ColumnType.VARCHAR,
+              constraints: [],
+            },
+          ],
+        },
+      ],
+      relationships: [],
+    };
 
     const errors = validate(s);
     expect(errors).toHaveLength(1);
@@ -343,9 +369,10 @@ describe("validate", () => {
   });
 
   it("detects duplicate column names within a table", () => {
-    let s = schemaWithTableAndColumn();
+    let s = schemaWithTable();
     const tableId = s.tables[0].id;
 
+    // Add a duplicate "id" column (default already has one)
     s = addColumn(s, tableId, {
       name: "id",
       type: ColumnType.VARCHAR,
@@ -388,19 +415,9 @@ describe("validate", () => {
 
 describe("generateJunctionTable", () => {
   it("creates a junction table with FK columns and relationships", () => {
+    // Both tables already have default id PK from addTable
     let s = schemaWithTable();
     s = addTable(s, "tags", { x: 200, y: 0 });
-
-    s = addColumn(s, s.tables[0].id, {
-      name: "id",
-      type: ColumnType.INTEGER,
-      constraints: [ColumnConstraint.PRIMARY_KEY],
-    });
-    s = addColumn(s, s.tables[1].id, {
-      name: "id",
-      type: ColumnType.INTEGER,
-      constraints: [ColumnConstraint.PRIMARY_KEY],
-    });
 
     const result = generateJunctionTable(s, s.tables[0].id, s.tables[1].id);
 
@@ -409,31 +426,51 @@ describe("generateJunctionTable", () => {
 
     const junction = result.tables[2];
     expect(junction.name).toBe("users_tags");
-    expect(junction.columns).toHaveLength(2);
-    expect(junction.columns[0].name).toBe("users_id");
-    expect(junction.columns[1].name).toBe("tags_id");
+    // 3 default columns + 2 FK columns
+    expect(junction.columns).toHaveLength(5);
+    expect(junction.columns[3].name).toBe("users_id");
+    expect(junction.columns[4].name).toBe("tags_id");
 
     // Should have 2 relationships
     expect(result.relationships).toHaveLength(2);
   });
 
   it("returns schema unchanged if source table has no PK", () => {
-    let s = schemaWithTable();
-    s = addTable(s, "tags", { x: 200, y: 0 });
+    // Construct tables manually so source has no PK
+    const s: Schema = {
+      version: 1,
+      tables: [
+        {
+          id: "t1",
+          name: "users",
+          position: { x: 0, y: 0 },
+          columns: [
+            {
+              id: "c1",
+              name: "name",
+              type: ColumnType.VARCHAR,
+              constraints: [],
+            },
+          ],
+        },
+        {
+          id: "t2",
+          name: "tags",
+          position: { x: 200, y: 0 },
+          columns: [
+            {
+              id: "c2",
+              name: "id",
+              type: ColumnType.INTEGER,
+              constraints: [ColumnConstraint.PRIMARY_KEY],
+            },
+          ],
+        },
+      ],
+      relationships: [],
+    };
 
-    // No PK on either table
-    s = addColumn(s, s.tables[0].id, {
-      name: "name",
-      type: ColumnType.VARCHAR,
-      constraints: [],
-    });
-    s = addColumn(s, s.tables[1].id, {
-      name: "id",
-      type: ColumnType.INTEGER,
-      constraints: [ColumnConstraint.PRIMARY_KEY],
-    });
-
-    const result = generateJunctionTable(s, s.tables[0].id, s.tables[1].id);
+    const result = generateJunctionTable(s, "t1", "t2");
     expect(result.tables).toHaveLength(2);
   });
 
