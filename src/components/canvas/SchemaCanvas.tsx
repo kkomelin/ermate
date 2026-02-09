@@ -22,9 +22,13 @@ const nodeTypes: NodeTypes = {
 export function SchemaCanvas() {
   const schema = useSchemaStore((s) => s.schema);
   const selectedTableId = useSchemaStore((s) => s.selectedTableId);
+  const selectedRelationshipId = useSchemaStore(
+    (s) => s.selectedRelationshipId,
+  );
   const selectTable = useSchemaStore((s) => s.selectTable);
+  const selectRelationship = useSchemaStore((s) => s.selectRelationship);
   const updateTable = useSchemaStore((s) => s.updateTable);
-  const addRelationship = useSchemaStore((s) => s.addRelationship);
+  const setPendingConnection = useSchemaStore((s) => s.setPendingConnection);
 
   const onSelect = useCallback(
     (tableId: string) => selectTable(tableId),
@@ -49,19 +53,27 @@ export function SchemaCanvas() {
 
   const edges: Edge[] = useMemo(
     () =>
-      schema.relationships.map((rel) => ({
-        id: rel.id,
-        source: rel.source.tableId,
-        sourceHandle: `${rel.source.columnId}-source`,
-        target: rel.target.tableId,
-        targetHandle: `${rel.target.columnId}-target`,
-        type: "smoothstep",
-        animated: rel.type === RelationshipType.ONE_TO_MANY,
-        label: rel.type,
-        labelStyle: { fontSize: 10, fontFamily: "monospace" },
-        style: { stroke: "var(--color-muted-foreground)", strokeWidth: 1.5 },
-      })),
-    [schema.relationships],
+      schema.relationships.map((rel) => {
+        const selected = rel.id === selectedRelationshipId;
+        return {
+          id: rel.id,
+          source: rel.source.tableId,
+          sourceHandle: `${rel.source.columnId}-source`,
+          target: rel.target.tableId,
+          targetHandle: `${rel.target.columnId}-target`,
+          type: "smoothstep",
+          animated: rel.type === RelationshipType.ONE_TO_MANY,
+          label: rel.type,
+          labelStyle: { fontSize: 10, fontFamily: "monospace" },
+          style: {
+            stroke: selected
+              ? "var(--color-primary)"
+              : "var(--color-muted-foreground)",
+            strokeWidth: selected ? 2.5 : 1.5,
+          },
+        };
+      }),
+    [schema.relationships, selectedRelationshipId],
   );
 
   const onNodesChange: OnNodesChange = useCallback(
@@ -96,7 +108,7 @@ export function SchemaCanvas() {
       const sourceColumnId = connection.sourceHandle.replace("-source", "");
       const targetColumnId = connection.targetHandle.replace("-target", "");
 
-      addRelationship({
+      setPendingConnection({
         source: {
           tableId: connection.source,
           columnId: sourceColumnId,
@@ -105,15 +117,22 @@ export function SchemaCanvas() {
           tableId: connection.target,
           columnId: targetColumnId,
         },
-        type: RelationshipType.ONE_TO_MANY,
       });
     },
-    [addRelationship],
+    [setPendingConnection],
+  );
+
+  const onEdgeClick = useCallback(
+    (_event: React.MouseEvent, edge: Edge) => {
+      selectRelationship(edge.id);
+    },
+    [selectRelationship],
   );
 
   const onPaneClick = useCallback(() => {
     selectTable(null);
-  }, [selectTable]);
+    selectRelationship(null);
+  }, [selectTable, selectRelationship]);
 
   return (
     <ReactFlow
@@ -122,6 +141,7 @@ export function SchemaCanvas() {
       nodeTypes={nodeTypes}
       onNodesChange={onNodesChange}
       onConnect={onConnect}
+      onEdgeClick={onEdgeClick}
       onPaneClick={onPaneClick}
       fitView
       snapToGrid

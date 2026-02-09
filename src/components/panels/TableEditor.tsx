@@ -5,18 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { ColumnRow } from "./ColumnRow";
+import { ConfirmDelete } from "./ConfirmDelete";
 import { cn } from "@/lib/utils";
 
 export function TableEditor() {
@@ -129,8 +119,8 @@ export function TableEditor() {
 
       {/* Footer — delete table */}
       <div className="border-t p-3">
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
+        <ConfirmDelete
+          trigger={
             <Button
               variant="outline"
               size="sm"
@@ -139,28 +129,17 @@ export function TableEditor() {
               <Trash2Icon className="size-3" />
               Delete Table
             </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent size="sm">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete table?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Table <strong className="font-mono">{table.name}</strong> and
-                all its columns will be permanently removed. Any relationships
-                involving this table will also be deleted.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel size="sm">Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                variant="destructive"
-                size="sm"
-                onClick={handleDeleteTable}
-              >
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          }
+          title="Delete table?"
+          description={
+            <>
+              Table <strong className="font-mono">{table.name}</strong> and all
+              its columns will be permanently removed. Any relationships
+              involving this table will also be deleted.
+            </>
+          }
+          onConfirm={handleDeleteTable}
+        />
       </div>
     </div>
   );

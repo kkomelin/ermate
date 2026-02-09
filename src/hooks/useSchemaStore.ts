@@ -4,6 +4,7 @@ import type {
   Column,
   Position,
   Relationship,
+  RelationshipEndpoint,
   Schema,
   ValidationError,
 } from "@/types/schema";
@@ -13,6 +14,10 @@ interface SchemaState {
   schema: Schema;
   selectedTableId: string | null;
   selectedRelationshipId: string | null;
+  pendingConnection: {
+    source: RelationshipEndpoint;
+    target: RelationshipEndpoint;
+  } | null;
 
   // Schema-level
   setSchema: (schema: Schema) => void;
@@ -47,6 +52,11 @@ interface SchemaState {
     targetTableId: string,
   ) => void;
 
+  // Pending connection
+  setPendingConnection: (
+    conn: { source: RelationshipEndpoint; target: RelationshipEndpoint } | null,
+  ) => void;
+
   // Selection
   selectTable: (tableId: string | null) => void;
   selectRelationship: (relId: string | null) => void;
@@ -59,6 +69,7 @@ export const useSchemaStore = create<SchemaState>((set, get) => ({
   schema: SchemaService.createEmptySchema(),
   selectedTableId: null,
   selectedRelationshipId: null,
+  pendingConnection: null,
 
   setSchema: (schema) => set({ schema }),
   resetSchema: () =>
@@ -66,6 +77,7 @@ export const useSchemaStore = create<SchemaState>((set, get) => ({
       schema: SchemaService.createEmptySchema(),
       selectedTableId: null,
       selectedRelationshipId: null,
+      pendingConnection: null,
     }),
 
   // Tables
@@ -117,6 +129,9 @@ export const useSchemaStore = create<SchemaState>((set, get) => ({
         targetTableId,
       ),
     })),
+
+  // Pending connection
+  setPendingConnection: (conn) => set({ pendingConnection: conn }),
 
   // Selection
   selectTable: (tableId) =>

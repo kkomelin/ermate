@@ -7,23 +7,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ConfirmDelete } from "./ConfirmDelete";
 import { cn } from "@/lib/utils";
 
 const COLUMN_TYPES: { value: ColumnType; label: string }[] = [
@@ -144,8 +134,8 @@ export function ColumnRow({ column, onUpdate, onRemove }: ColumnRowProps) {
       </div>
 
       {/* Delete */}
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
+      <ConfirmDelete
+        trigger={
           <Button
             variant="ghost"
             size="icon"
@@ -153,28 +143,17 @@ export function ColumnRow({ column, onUpdate, onRemove }: ColumnRowProps) {
           >
             <Trash2Icon className="size-3" />
           </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent size="sm">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete column?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Column <strong className="font-mono">{column.name}</strong> will
-              be permanently removed. Any relationships using this column will
-              also be deleted.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel size="sm">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              size="sm"
-              onClick={() => onRemove(column.id)}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        }
+        title="Delete column?"
+        description={
+          <>
+            Column <strong className="font-mono">{column.name}</strong> will be
+            permanently removed. Any relationships using this column will also be
+            deleted.
+          </>
+        }
+        onConfirm={() => onRemove(column.id)}
+      />
     </div>
   );
 }
