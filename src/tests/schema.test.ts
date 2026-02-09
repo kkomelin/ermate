@@ -529,7 +529,15 @@ describe('generateJunctionTable', () => {
     // 3 default columns + 2 FK columns
     expect(junction.columns).toHaveLength(5)
     expect(junction.columns[3].name).toBe('users_id')
+    expect(junction.columns[3].constraints).toContain(
+      ColumnConstraint.FOREIGN_KEY
+    )
+    expect(junction.columns[3].constraints).toContain(ColumnConstraint.NOT_NULL)
     expect(junction.columns[4].name).toBe('tags_id')
+    expect(junction.columns[4].constraints).toContain(
+      ColumnConstraint.FOREIGN_KEY
+    )
+    expect(junction.columns[4].constraints).toContain(ColumnConstraint.NOT_NULL)
 
     // Should have 2 relationships
     expect(result.relationships).toHaveLength(2)

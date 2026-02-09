@@ -44,6 +44,12 @@ const CONSTRAINT_TOGGLES: {
       'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40',
   },
   {
+    value: CC.FOREIGN_KEY,
+    label: 'FK',
+    activeClass:
+      'bg-purple-500/15 text-purple-700 dark:text-purple-400 border-purple-500/40',
+  },
+  {
     value: CC.NOT_NULL,
     label: 'NN',
     activeClass: 'bg-muted text-foreground border-border',

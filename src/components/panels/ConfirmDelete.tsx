@@ -12,10 +12,12 @@ import {
 } from '@/components/ui/alert-dialog'
 
 interface ConfirmDeleteProps {
-  trigger: ReactNode
+  trigger?: ReactNode
   title: string
   description: ReactNode
   onConfirm: () => void
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 export function ConfirmDelete({
@@ -23,10 +25,12 @@ export function ConfirmDelete({
   title,
   description,
   onConfirm,
+  open,
+  onOpenChange,
 }: ConfirmDeleteProps) {
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      {trigger && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
       <AlertDialogContent size="sm">
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>

@@ -18,6 +18,7 @@ import { useSchemaStore } from '@/hooks/useSchemaStore'
 import { useTheme } from '@/hooks/useTheme'
 import { TableNode, type TableNodeData } from './TableNode'
 import { RelationshipType } from '@/types/schema'
+import { ConfirmDelete } from '@/components/panels/ConfirmDelete'
 
 const nodeTypes: NodeTypes = {
   table: TableNode,
@@ -32,6 +33,15 @@ export function SchemaCanvas() {
   const selectRelationship = useSchemaStore((s) => s.selectRelationship)
   const updateTable = useSchemaStore((s) => s.updateTable)
   const setPendingConnection = useSchemaStore((s) => s.setPendingConnection)
+  const removeTable = useSchemaStore((s) => s.removeTable)
+  const removeRelationship = useSchemaStore((s) => s.removeRelationship)
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<{
+    type: 'table' | 'relationship'
+    id: string
+    name: string
+  } | null>(null)
 
   const { fitView } = useReactFlow()
 
@@ -47,6 +57,53 @@ export function SchemaCanvas() {
       window.removeEventListener('resize', handleResize)
     }
   }, [fitView])
+
+  // Handle Delete key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle Delete if not in an input field
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return
+      }
+
+      if (e.key === 'Delete') {
+        e.preventDefault()
+        if (selectedTableId) {
+          const table = schema.tables.find((t) => t.id === selectedTableId)
+          if (table) {
+            setDeleteTarget({ type: 'table', id: table.id, name: table.name })
+            setShowDeleteConfirm(true)
+          }
+        } else if (selectedRelationshipId) {
+          const rel = schema.relationships.find(
+            (r) => r.id === selectedRelationshipId
+          )
+          if (rel) {
+            const sourceTable = schema.tables.find(
+              (t) => t.id === rel.source.tableId
+            )
+            const targetTable = schema.tables.find(
+              (t) => t.id === rel.target.tableId
+            )
+            const name = `${sourceTable?.name ?? '?'} → ${targetTable?.name ?? '?'}`
+            setDeleteTarget({ type: 'relationship', id: rel.id, name })
+            setShowDeleteConfirm(true)
+          }
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [
+    selectedTableId,
+    selectedRelationshipId,
+    schema.tables,
+    schema.relationships,
+  ])
 
   // Store nodes in local state for React Flow
   const [nodes, setNodes] = useState<Node[]>(() =>
@@ -244,6 +301,36 @@ export function SchemaCanvas() {
           )}
         </Button>
       </div>
+
+      {/* Delete confirmation dialog */}
+      <ConfirmDelete
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title={`Delete ${deleteTarget?.type === 'table' ? 'table' : 'relationship'}?`}
+        description={
+          deleteTarget?.type === 'table' ? (
+            <>
+              Table <strong className="font-mono">{deleteTarget.name}</strong>{' '}
+              and all its columns will be permanently removed. Any relationships
+              involving this table will also be deleted.
+            </>
+          ) : (
+            <>
+              The relationship{' '}
+              <strong className="font-mono">{deleteTarget?.name}</strong> will
+              be permanently removed.
+            </>
+          )
+        }
+        onConfirm={() => {
+          if (deleteTarget?.type === 'table') {
+            removeTable(deleteTarget.id)
+          } else if (deleteTarget?.type === 'relationship') {
+            removeRelationship(deleteTarget.id)
+          }
+          setDeleteTarget(null)
+        }}
+      />
     </ReactFlow>
   )
 }

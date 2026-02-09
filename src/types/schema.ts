@@ -9,6 +9,7 @@ export type ColumnType = (typeof ColumnType)[keyof typeof ColumnType]
 
 export const ColumnConstraint = {
   PRIMARY_KEY: 'PRIMARY KEY',
+  FOREIGN_KEY: 'FOREIGN KEY',
   NOT_NULL: 'NOT NULL',
   UNIQUE: 'UNIQUE',
 } as const

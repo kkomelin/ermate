@@ -25,6 +25,10 @@ const CONSTRAINT_BADGE: Record<string, { label: string; className: string }> = {
     label: 'PK',
     className: 'bg-amber-500/20 text-amber-700 dark:text-amber-300',
   },
+  'FOREIGN KEY': {
+    label: 'FK',
+    className: 'bg-purple-500/15 text-purple-700 dark:text-purple-400',
+  },
   'NOT NULL': {
     label: 'NN',
     className: 'bg-muted text-muted-foreground',
@@ -37,10 +41,6 @@ const CONSTRAINT_BADGE: Record<string, { label: string; className: string }> = {
 
 function TableNodeComponent({ data }: NodeProps) {
   const { table, selected, onSelect } = data as unknown as TableNodeData
-
-  const hasPk = table.columns.some((c) =>
-    c.constraints.includes(ColumnConstraint.PRIMARY_KEY)
-  )
 
   return (
     <div
@@ -61,7 +61,6 @@ function TableNodeComponent({ data }: NodeProps) {
             : 'bg-muted/50 dark:bg-muted/30'
         )}
       >
-        {hasPk && <KeyRoundIcon className="size-3.5 shrink-0 text-amber-500" />}
         <span className="text-card-foreground truncate font-semibold">
           {table.name}
         </span>
@@ -79,6 +78,7 @@ function TableNodeComponent({ data }: NodeProps) {
         ) : (
           table.columns.map((col, idx) => {
             const isPk = col.constraints.includes(ColumnConstraint.PRIMARY_KEY)
+            const isFk = col.constraints.includes(ColumnConstraint.FOREIGN_KEY)
 
             return (
               <div
@@ -87,7 +87,10 @@ function TableNodeComponent({ data }: NodeProps) {
                   'group relative flex items-center gap-1.5 px-3 py-1.5',
                   idx !== table.columns.length - 1 &&
                     'border-border/50 border-b',
-                  isPk && 'bg-amber-500/[0.04] dark:bg-amber-500/[0.03]'
+                  isPk && 'bg-amber-500/[0.04] dark:bg-amber-500/[0.03]',
+                  isFk &&
+                    !isPk &&
+                    'bg-purple-500/[0.03] dark:bg-purple-500/[0.02]'
                 )}
               >
                 {/* Target handle — left side */}
@@ -103,11 +106,16 @@ function TableNodeComponent({ data }: NodeProps) {
                   <KeyRoundIcon className="size-3 shrink-0 text-amber-500" />
                 )}
 
+                {/* FK icon */}
+                {isFk && !isPk && (
+                  <KeyRoundIcon className="size-3 shrink-0 text-purple-500" />
+                )}
+
                 {/* Column name */}
                 <span
                   className={cn(
                     'min-w-0 shrink truncate',
-                    isPk
+                    isPk || isFk
                       ? 'text-card-foreground font-semibold'
                       : 'text-card-foreground/80'
                   )}
@@ -127,7 +135,11 @@ function TableNodeComponent({ data }: NodeProps) {
 
                 {/* Constraint badges */}
                 {col.constraints
-                  .filter((c) => c !== ColumnConstraint.PRIMARY_KEY)
+                  .filter(
+                    (c) =>
+                      c !== ColumnConstraint.PRIMARY_KEY &&
+                      c !== ColumnConstraint.FOREIGN_KEY
+                  )
                   .map((constraint) => {
                     const badge = CONSTRAINT_BADGE[constraint]
                     if (!badge) return null

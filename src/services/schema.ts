@@ -379,7 +379,7 @@ export function generateJunctionTable(
   const fkCol1: Omit<Column, 'id'> = {
     name: `${sourceTable.name}_id`,
     type: sourcePk.type,
-    constraints: [ColumnConstraint.NOT_NULL],
+    constraints: [ColumnConstraint.FOREIGN_KEY, ColumnConstraint.NOT_NULL],
   }
   result = addColumn(result, junctionTable.id, fkCol1)
 
@@ -390,7 +390,7 @@ export function generateJunctionTable(
   const fkCol2: Omit<Column, 'id'> = {
     name: `${targetTable.name}_id`,
     type: targetPk.type,
-    constraints: [ColumnConstraint.NOT_NULL],
+    constraints: [ColumnConstraint.FOREIGN_KEY, ColumnConstraint.NOT_NULL],
   }
   result = addColumn(result, junctionTable.id, fkCol2)
 
