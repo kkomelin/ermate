@@ -12,6 +12,8 @@ import * as SchemaService from "@/services/schema";
 
 interface SchemaState {
   schema: Schema;
+  schemaId: string | null;
+  schemaName: string;
   selectedTableId: string | null;
   selectedRelationshipId: string | null;
   pendingConnection: {
@@ -22,6 +24,10 @@ interface SchemaState {
   // Schema-level
   setSchema: (schema: Schema) => void;
   resetSchema: () => void;
+  setSchemaIdentity: (id: string, name: string) => void;
+  setSchemaName: (name: string) => void;
+  loadSchema: (id: string, name: string, schema: Schema) => void;
+  newSchema: () => void;
 
   // Tables
   addTable: (name: string, position: Position) => void;
@@ -67,6 +73,8 @@ interface SchemaState {
 
 export const useSchemaStore = create<SchemaState>((set, get) => ({
   schema: SchemaService.createEmptySchema(),
+  schemaId: null,
+  schemaName: "Untitled",
   selectedTableId: null,
   selectedRelationshipId: null,
   pendingConnection: null,
@@ -75,6 +83,28 @@ export const useSchemaStore = create<SchemaState>((set, get) => ({
   resetSchema: () =>
     set({
       schema: SchemaService.createEmptySchema(),
+      schemaId: null,
+      schemaName: "Untitled",
+      selectedTableId: null,
+      selectedRelationshipId: null,
+      pendingConnection: null,
+    }),
+  setSchemaIdentity: (id, name) => set({ schemaId: id, schemaName: name }),
+  setSchemaName: (name) => set({ schemaName: name }),
+  loadSchema: (id, name, schema) =>
+    set({
+      schema,
+      schemaId: id,
+      schemaName: name,
+      selectedTableId: null,
+      selectedRelationshipId: null,
+      pendingConnection: null,
+    }),
+  newSchema: () =>
+    set({
+      schema: SchemaService.createEmptySchema(),
+      schemaId: null,
+      schemaName: "Untitled",
       selectedTableId: null,
       selectedRelationshipId: null,
       pendingConnection: null,
