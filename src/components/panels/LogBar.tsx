@@ -12,8 +12,6 @@ import {
 } from 'lucide-react'
 import { useMemo } from 'react'
 
-
-
 function describeChange(prev: Schema, curr: Schema): string {
   // Table additions
   if (curr.tables.length > prev.tables.length) {
