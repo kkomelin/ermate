@@ -1,9 +1,10 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import {
   ReactFlow,
   Background,
   BackgroundVariant,
   Controls,
+  useReactFlow,
   type Node,
   type Edge,
   type OnNodesChange,
@@ -32,6 +33,21 @@ export function SchemaCanvas() {
   const selectRelationship = useSchemaStore((s) => s.selectRelationship);
   const updateTable = useSchemaStore((s) => s.updateTable);
   const setPendingConnection = useSchemaStore((s) => s.setPendingConnection);
+
+  const { fitView } = useReactFlow();
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const handleResize = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fitView({ padding: 0.1 }), 200);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [fitView]);
 
   const onSelect = useCallback(
     (tableId: string) => selectTable(tableId),

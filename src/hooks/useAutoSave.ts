@@ -15,7 +15,7 @@ export function useAutoSave() {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
     timeoutRef.current = setTimeout(() => {
-      DalService.saveSchema(schemaId, schemaName, schema);
+      if (schemaId) DalService.saveSchema(schemaId, schemaName, schema);
     }, AUTO_SAVE_DELAY);
 
     return () => {
