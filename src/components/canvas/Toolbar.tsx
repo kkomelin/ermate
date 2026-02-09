@@ -306,12 +306,23 @@ export function Toolbar() {
 
         <div className="bg-border mx-1 h-5 w-px" />
 
+
         <Tooltip>
           <TooltipTrigger asChild>
             <button
               type="button"
               className="relative cursor-pointer p-1"
-              onClick={toggleLogBar}
+              onClick={() => {
+                const isErrorsActive = useLogBarStore.getState().activeTab === 'errors'
+                const isExpanded = useLogBarStore.getState().expanded
+
+                if (isExpanded && isErrorsActive) {
+                  toggleLogBar()
+                } else {
+                  useLogBarStore.getState().setActiveTab('errors')
+                  if (!isExpanded) toggleLogBar()
+                }
+              }}
             >
               <ShieldCheckIcon className="text-muted-foreground size-4" />
               {errorCount > 0 && (

@@ -10,9 +10,9 @@ import {
   OctagonXIcon,
   TriangleAlertIcon,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
-type Tab = 'errors' | 'history'
+
 
 function describeChange(prev: Schema, curr: Schema): string {
   // Table additions
@@ -110,7 +110,8 @@ export function LogBar() {
 
   const expanded = useLogBarStore((s) => s.expanded)
   const toggle = useLogBarStore((s) => s.toggle)
-  const [activeTab, setActiveTab] = useState<Tab>('errors')
+  const activeTab = useLogBarStore((s) => s.activeTab)
+  const setActiveTab = useLogBarStore((s) => s.setActiveTab)
 
   return (
     <div className="bg-card/95 border-t shadow-lg backdrop-blur-sm">
@@ -199,7 +200,7 @@ export function LogBar() {
         <div className="max-h-40 space-y-1 overflow-y-auto border-t px-4 py-2">
           {activeTab === 'errors' &&
             (issues.length === 0 ? (
-              <div className="text-muted-foreground flex items-center justify-center gap-1.5 py-2 text-xs">
+              <div className="text-muted-foreground flex items-center justify-start gap-1.5 py-2 text-xs">
                 <CircleCheckIcon className="size-3.5 text-emerald-500" />
                 No validation issues
               </div>
@@ -232,7 +233,7 @@ export function LogBar() {
 
           {activeTab === 'history' &&
             (historyEntries.length === 0 ? (
-              <div className="text-muted-foreground py-2 text-center text-xs">
+              <div className="text-muted-foreground py-2 text-left text-xs">
                 No changes yet
               </div>
             ) : (
