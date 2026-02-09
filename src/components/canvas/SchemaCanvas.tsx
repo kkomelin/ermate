@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from 'react'
 import {
   ReactFlow,
   Background,
@@ -10,55 +10,53 @@ import {
   type OnNodesChange,
   type OnConnect,
   type NodeTypes,
-} from "@xyflow/react";
-import { MoonIcon, SunIcon, TablePropertiesIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useSchemaStore } from "@/hooks/useSchemaStore";
-import { useTheme } from "@/hooks/useTheme";
-import { TableNode, type TableNodeData } from "./TableNode";
-import { RelationshipType } from "@/types/schema";
+} from '@xyflow/react'
+import { MoonIcon, SunIcon, TablePropertiesIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { useSchemaStore } from '@/hooks/useSchemaStore'
+import { useTheme } from '@/hooks/useTheme'
+import { TableNode, type TableNodeData } from './TableNode'
+import { RelationshipType } from '@/types/schema'
 
 const nodeTypes: NodeTypes = {
   table: TableNode,
-};
+}
 
 export function SchemaCanvas() {
-  const { theme, toggleTheme } = useTheme();
-  const schema = useSchemaStore((s) => s.schema);
-  const selectedTableId = useSchemaStore((s) => s.selectedTableId);
-  const selectedRelationshipId = useSchemaStore(
-    (s) => s.selectedRelationshipId,
-  );
-  const selectTable = useSchemaStore((s) => s.selectTable);
-  const selectRelationship = useSchemaStore((s) => s.selectRelationship);
-  const updateTable = useSchemaStore((s) => s.updateTable);
-  const setPendingConnection = useSchemaStore((s) => s.setPendingConnection);
+  const { theme, toggleTheme } = useTheme()
+  const schema = useSchemaStore((s) => s.schema)
+  const selectedTableId = useSchemaStore((s) => s.selectedTableId)
+  const selectedRelationshipId = useSchemaStore((s) => s.selectedRelationshipId)
+  const selectTable = useSchemaStore((s) => s.selectTable)
+  const selectRelationship = useSchemaStore((s) => s.selectRelationship)
+  const updateTable = useSchemaStore((s) => s.updateTable)
+  const setPendingConnection = useSchemaStore((s) => s.setPendingConnection)
 
-  const { fitView } = useReactFlow();
+  const { fitView } = useReactFlow()
 
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
+    let timer: ReturnType<typeof setTimeout>
     const handleResize = () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => fitView({ padding: 0.1, maxZoom: 1 }), 200);
-    };
-    window.addEventListener("resize", handleResize);
+      clearTimeout(timer)
+      timer = setTimeout(() => fitView({ padding: 0.1, maxZoom: 1 }), 200)
+    }
+    window.addEventListener('resize', handleResize)
     return () => {
-      clearTimeout(timer);
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [fitView]);
+      clearTimeout(timer)
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [fitView])
 
   const onSelect = useCallback(
     (tableId: string) => selectTable(tableId),
-    [selectTable],
-  );
+    [selectTable]
+  )
 
   const nodes: Node[] = useMemo(
     () =>
       schema.tables.map((table) => ({
         id: table.id,
-        type: "table",
+        type: 'table',
         position: table.position,
         data: {
           table,
@@ -67,51 +65,51 @@ export function SchemaCanvas() {
         } satisfies TableNodeData,
         selected: table.id === selectedTableId,
       })),
-    [schema.tables, selectedTableId, onSelect],
-  );
+    [schema.tables, selectedTableId, onSelect]
+  )
 
   const edges: Edge[] = useMemo(
     () =>
       schema.relationships.map((rel) => {
-        const selected = rel.id === selectedRelationshipId;
+        const selected = rel.id === selectedRelationshipId
         return {
           id: rel.id,
           source: rel.source.tableId,
           sourceHandle: `${rel.source.columnId}-source`,
           target: rel.target.tableId,
           targetHandle: `${rel.target.columnId}-target`,
-          type: "smoothstep",
+          type: 'smoothstep',
           animated: rel.type === RelationshipType.ONE_TO_MANY,
           label: rel.type,
-          labelStyle: { fontSize: 10, fontFamily: "monospace" },
+          labelStyle: { fontSize: 10, fontFamily: 'monospace' },
           style: {
             stroke: selected
-              ? "var(--color-primary)"
-              : "var(--color-muted-foreground)",
+              ? 'var(--color-primary)'
+              : 'var(--color-muted-foreground)',
             strokeWidth: selected ? 2.5 : 1.5,
           },
-        };
+        }
       }),
-    [schema.relationships, selectedRelationshipId],
-  );
+    [schema.relationships, selectedRelationshipId]
+  )
 
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => {
       for (const change of changes) {
-        if (change.type === "position" && change.position) {
-          updateTable(change.id, { position: change.position });
+        if (change.type === 'position' && change.position) {
+          updateTable(change.id, { position: change.position })
         }
       }
 
       // Handle selection changes
       for (const change of changes) {
-        if (change.type === "select" && change.selected) {
-          selectTable(change.id);
+        if (change.type === 'select' && change.selected) {
+          selectTable(change.id)
         }
       }
     },
-    [nodes, updateTable, selectTable],
-  );
+    [nodes, updateTable, selectTable]
+  )
 
   const onConnect: OnConnect = useCallback(
     (connection) => {
@@ -121,11 +119,11 @@ export function SchemaCanvas() {
         !connection.sourceHandle ||
         !connection.targetHandle
       )
-        return;
+        return
 
       // Extract column IDs from handle IDs (format: "columnId-source" / "columnId-target")
-      const sourceColumnId = connection.sourceHandle.replace("-source", "");
-      const targetColumnId = connection.targetHandle.replace("-target", "");
+      const sourceColumnId = connection.sourceHandle.replace('-source', '')
+      const targetColumnId = connection.targetHandle.replace('-target', '')
 
       setPendingConnection({
         source: {
@@ -136,22 +134,22 @@ export function SchemaCanvas() {
           tableId: connection.target,
           columnId: targetColumnId,
         },
-      });
+      })
     },
-    [setPendingConnection],
-  );
+    [setPendingConnection]
+  )
 
   const onEdgeClick = useCallback(
     (_event: React.MouseEvent, edge: Edge) => {
-      selectRelationship(edge.id);
+      selectRelationship(edge.id)
     },
-    [selectRelationship],
-  );
+    [selectRelationship]
+  )
 
   const onPaneClick = useCallback(() => {
-    selectTable(null);
-    selectRelationship(null);
-  }, [selectTable, selectRelationship]);
+    selectTable(null)
+    selectRelationship(null)
+  }, [selectTable, selectRelationship])
 
   return (
     <ReactFlow
@@ -177,14 +175,20 @@ export function SchemaCanvas() {
         size={1}
         color="var(--color-border)"
       />
-      <Controls className="!rounded-lg !border !border-border !bg-card !shadow-md [&>button]:!border-border [&>button]:!bg-card [&>button]:!text-card-foreground [&>button]:hover:!bg-muted" />
+      <Controls className="!border-border !bg-card [&>button]:!border-border [&>button]:!bg-card [&>button]:!text-card-foreground [&>button]:hover:!bg-muted !rounded-lg !border !shadow-md" />
       {/* ERMate branding + theme toggle */}
-      <div className="absolute right-2 bottom-2 z-10 flex items-center gap-1.5 rounded-md border border-border bg-card/90 px-2 py-1 text-xs font-semibold tracking-tight text-muted-foreground shadow-sm backdrop-blur-sm">
+      <div className="border-border bg-card/90 text-muted-foreground absolute right-2 bottom-2 z-10 flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-semibold tracking-tight shadow-sm backdrop-blur-sm">
         <TablePropertiesIcon className="size-3.5" />
         ERMate
-        <div className="mx-0.5 h-3.5 w-px bg-border" />
-        <Button variant="ghost" size="icon-xs" onClick={toggleTheme} title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} className="size-5 text-muted-foreground hover:text-foreground">
-          {theme === "dark" ? (
+        <div className="bg-border mx-0.5 h-3.5 w-px" />
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          onClick={toggleTheme}
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          className="text-muted-foreground hover:text-foreground size-5"
+        >
+          {theme === 'dark' ? (
             <SunIcon className="size-3.5" />
           ) : (
             <MoonIcon className="size-3.5" />
@@ -192,5 +196,5 @@ export function SchemaCanvas() {
         </Button>
       </div>
     </ReactFlow>
-  );
+  )
 }

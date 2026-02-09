@@ -4,10 +4,10 @@ import {
   Loader2Icon,
   OctagonXIcon,
   TriangleAlertIcon,
-} from "lucide-react"
-import { Toaster as Sonner, type ToasterProps } from "sonner"
+} from 'lucide-react'
+import { Toaster as Sonner, type ToasterProps } from 'sonner'
 
-const Toaster = ({ theme = "dark", ...props }: ToasterProps) => {
+const Toaster = ({ theme = 'dark', ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme}
@@ -21,10 +21,10 @@ const Toaster = ({ theme = "dark", ...props }: ToasterProps) => {
       }}
       style={
         {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-          "--border-radius": "var(--radius)",
+          '--normal-bg': 'var(--popover)',
+          '--normal-text': 'var(--popover-foreground)',
+          '--normal-border': 'var(--border)',
+          '--border-radius': 'var(--radius)',
         } as React.CSSProperties
       }
       {...props}

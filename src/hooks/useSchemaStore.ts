@@ -1,7 +1,7 @@
-import { create } from "zustand";
-import { temporal } from "zundo";
-import { useStoreWithEqualityFn } from "zustand/traditional";
-import type { TemporalState } from "zundo";
+import { create } from 'zustand'
+import { temporal } from 'zundo'
+import { useStoreWithEqualityFn } from 'zustand/traditional'
+import type { TemporalState } from 'zundo'
 
 import type {
   Column,
@@ -10,77 +10,74 @@ import type {
   RelationshipEndpoint,
   Schema,
   ValidationError,
-} from "@/types/schema";
-import * as SchemaService from "@/services/schema";
-import * as DalService from "@/services/dal";
+} from '@/types/schema'
+import * as SchemaService from '@/services/schema'
+import * as DalService from '@/services/dal'
 
 interface SchemaState {
-  schema: Schema;
-  schemaId: string | null;
-  schemaName: string;
-  selectedTableId: string | null;
-  selectedRelationshipId: string | null;
+  schema: Schema
+  schemaId: string | null
+  schemaName: string
+  selectedTableId: string | null
+  selectedRelationshipId: string | null
   pendingConnection: {
-    source: RelationshipEndpoint;
-    target: RelationshipEndpoint;
-  } | null;
+    source: RelationshipEndpoint
+    target: RelationshipEndpoint
+  } | null
 
   // Schema-level
-  setSchema: (schema: Schema) => void;
-  resetSchema: () => void;
-  setSchemaIdentity: (id: string, name: string) => void;
-  setSchemaName: (name: string) => void;
-  loadSchema: (id: string, name: string, schema: Schema) => void;
-  newSchema: () => void;
+  setSchema: (schema: Schema) => void
+  resetSchema: () => void
+  setSchemaIdentity: (id: string, name: string) => void
+  setSchemaName: (name: string) => void
+  loadSchema: (id: string, name: string, schema: Schema) => void
+  newSchema: () => void
 
   // Tables
-  addTable: (name: string, position: Position) => void;
+  addTable: (name: string, position: Position) => void
   addTableWithColumns: (
     name: string,
     position: Position,
-    extraColumns: Omit<Column, "id">[],
-  ) => void;
+    extraColumns: Omit<Column, 'id'>[]
+  ) => void
   updateTable: (
     tableId: string,
-    updates: Partial<Pick<import("../types/schema").Table, "name" | "position">>,
-  ) => void;
-  removeTable: (tableId: string) => void;
+    updates: Partial<Pick<import('../types/schema').Table, 'name' | 'position'>>
+  ) => void
+  removeTable: (tableId: string) => void
 
   // Columns
-  addColumn: (tableId: string, column: Omit<Column, "id">) => void;
+  addColumn: (tableId: string, column: Omit<Column, 'id'>) => void
   updateColumn: (
     tableId: string,
     columnId: string,
-    updates: Partial<Pick<Column, "name" | "type" | "constraints">>,
-  ) => void;
-  removeColumn: (tableId: string, columnId: string) => void;
+    updates: Partial<Pick<Column, 'name' | 'type' | 'constraints'>>
+  ) => void
+  removeColumn: (tableId: string, columnId: string) => void
 
   // Relationships
-  addRelationship: (rel: Omit<Relationship, "id">) => void;
+  addRelationship: (rel: Omit<Relationship, 'id'>) => void
   updateRelationship: (
     relId: string,
-    updates: Partial<Pick<Relationship, "type" | "source" | "target">>,
-  ) => void;
-  removeRelationship: (relId: string) => void;
-  generateJunctionTable: (
-    sourceTableId: string,
-    targetTableId: string,
-  ) => void;
+    updates: Partial<Pick<Relationship, 'type' | 'source' | 'target'>>
+  ) => void
+  removeRelationship: (relId: string) => void
+  generateJunctionTable: (sourceTableId: string, targetTableId: string) => void
 
   // Pending connection
   setPendingConnection: (
-    conn: { source: RelationshipEndpoint; target: RelationshipEndpoint } | null,
-  ) => void;
+    conn: { source: RelationshipEndpoint; target: RelationshipEndpoint } | null
+  ) => void
 
   // Selection
-  selectTable: (tableId: string | null) => void;
-  selectRelationship: (relId: string | null) => void;
+  selectTable: (tableId: string | null) => void
+  selectRelationship: (relId: string | null) => void
 
   // Validation
-  validate: () => ValidationError[];
+  validate: () => ValidationError[]
 }
 
-type PartializedState = Pick<SchemaState, "schema">;
+type PartializedState = Pick<SchemaState, 'schema'>
 
 export const useSchemaStore = create<SchemaState>()(
   temporal(
@@ -94,7 +91,7 @@ export const useSchemaStore = create<SchemaState>()(
 
       setSchema: (schema) => set({ schema }),
       resetSchema: () => {
-        const name = DalService.nextUntitledName();
+        const name = DalService.nextUntitledName()
         set({
           schema: SchemaService.createEmptySchema(),
           schemaId: crypto.randomUUID(),
@@ -102,7 +99,7 @@ export const useSchemaStore = create<SchemaState>()(
           selectedTableId: null,
           selectedRelationshipId: null,
           pendingConnection: null,
-        });
+        })
       },
       setSchemaIdentity: (id, name) => set({ schemaId: id, schemaName: name }),
       setSchemaName: (name) => set({ schemaName: name }),
@@ -116,7 +113,7 @@ export const useSchemaStore = create<SchemaState>()(
           pendingConnection: null,
         }),
       newSchema: () => {
-        const name = DalService.nextUntitledName();
+        const name = DalService.nextUntitledName()
         set({
           schema: SchemaService.createEmptySchema(),
           schemaId: crypto.randomUUID(),
@@ -124,7 +121,7 @@ export const useSchemaStore = create<SchemaState>()(
           selectedTableId: null,
           selectedRelationshipId: null,
           pendingConnection: null,
-        });
+        })
       },
 
       // Tables
@@ -138,7 +135,7 @@ export const useSchemaStore = create<SchemaState>()(
             s.schema,
             name,
             position,
-            extraColumns,
+            extraColumns
           ),
         })),
       updateTable: (tableId, updates) =>
@@ -163,7 +160,7 @@ export const useSchemaStore = create<SchemaState>()(
             s.schema,
             tableId,
             columnId,
-            updates,
+            updates
           ),
         })),
       removeColumn: (tableId, columnId) =>
@@ -191,7 +188,7 @@ export const useSchemaStore = create<SchemaState>()(
           schema: SchemaService.generateJunctionTable(
             s.schema,
             sourceTableId,
-            targetTableId,
+            targetTableId
           ),
         })),
 
@@ -210,24 +207,29 @@ export const useSchemaStore = create<SchemaState>()(
     {
       partialize: (state) => ({ schema: state.schema }) as PartializedState,
       equality: (pastState, currentState) => {
-        const past = pastState.schema;
-        const curr = currentState.schema;
+        const past = pastState.schema
+        const curr = currentState.schema
         // Compare everything except table positions
-        if (past.tables.length !== curr.tables.length) return false;
-        if (past.relationships !== curr.relationships) return false;
+        if (past.tables.length !== curr.tables.length) return false
+        if (past.relationships !== curr.relationships) return false
         for (let i = 0; i < past.tables.length; i++) {
-          const pt = past.tables[i];
-          const ct = curr.tables[i];
-          if (pt.id !== ct.id || pt.name !== ct.name || pt.columns !== ct.columns) return false;
+          const pt = past.tables[i]
+          const ct = curr.tables[i]
+          if (
+            pt.id !== ct.id ||
+            pt.name !== ct.name ||
+            pt.columns !== ct.columns
+          )
+            return false
         }
-        return true;
+        return true
       },
-    },
-  ),
-);
+    }
+  )
+)
 
 export function useTemporalStore<T>(
-  selector: (state: TemporalState<PartializedState>) => T,
+  selector: (state: TemporalState<PartializedState>) => T
 ) {
-  return useStoreWithEqualityFn(useSchemaStore.temporal, selector);
+  return useStoreWithEqualityFn(useSchemaStore.temporal, selector)
 }

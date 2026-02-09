@@ -1,58 +1,58 @@
-import { PlusIcon, Trash2Icon, XIcon } from "lucide-react";
-import { useSchemaStore } from "@/hooks/useSchemaStore";
-import { ColumnType } from "@/types/schema";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { ColumnRow } from "./ColumnRow";
-import { ConfirmDelete } from "./ConfirmDelete";
-import { cn } from "@/lib/utils";
+import { PlusIcon, Trash2Icon, XIcon } from 'lucide-react'
+import { useSchemaStore } from '@/hooks/useSchemaStore'
+import { ColumnType } from '@/types/schema'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
+import { ColumnRow } from './ColumnRow'
+import { ConfirmDelete } from './ConfirmDelete'
+import { cn } from '@/lib/utils'
 
 export function TableEditor() {
-  const schema = useSchemaStore((s) => s.schema);
-  const selectedTableId = useSchemaStore((s) => s.selectedTableId);
-  const updateTable = useSchemaStore((s) => s.updateTable);
-  const addColumn = useSchemaStore((s) => s.addColumn);
-  const updateColumn = useSchemaStore((s) => s.updateColumn);
-  const removeColumn = useSchemaStore((s) => s.removeColumn);
-  const removeTable = useSchemaStore((s) => s.removeTable);
-  const selectTable = useSchemaStore((s) => s.selectTable);
+  const schema = useSchemaStore((s) => s.schema)
+  const selectedTableId = useSchemaStore((s) => s.selectedTableId)
+  const updateTable = useSchemaStore((s) => s.updateTable)
+  const addColumn = useSchemaStore((s) => s.addColumn)
+  const updateColumn = useSchemaStore((s) => s.updateColumn)
+  const removeColumn = useSchemaStore((s) => s.removeColumn)
+  const removeTable = useSchemaStore((s) => s.removeTable)
+  const selectTable = useSchemaStore((s) => s.selectTable)
 
   const table = selectedTableId
     ? schema.tables.find((t) => t.id === selectedTableId)
-    : null;
+    : null
 
-  if (!table) return null;
+  if (!table) return null
 
   const handleAddColumn = () => {
     addColumn(table.id, {
       name: `column_${table.columns.length + 1}`,
       type: ColumnType.VARCHAR,
       constraints: [],
-    });
-  };
+    })
+  }
 
   const handleDeleteTable = () => {
-    removeTable(table.id);
-  };
+    removeTable(table.id)
+  }
 
   return (
     <div
       className={cn(
-        "absolute top-0 right-0 z-20 flex h-full w-[320px] flex-col border-l bg-card font-mono shadow-lg",
-        "animate-in slide-in-from-right duration-200",
+        'bg-card absolute top-0 right-0 z-20 flex h-full w-[320px] flex-col border-l font-mono shadow-lg',
+        'animate-in slide-in-from-right duration-200'
       )}
     >
       {/* Header */}
       <div className="flex items-center justify-between border-b px-3 py-2.5">
-        <span className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
+        <span className="text-muted-foreground text-[10px] font-semibold tracking-widest uppercase">
           Table
         </span>
         <Button
           variant="ghost"
           size="icon"
-          className="size-6 text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground size-6"
           onClick={() => selectTable(null)}
         >
           <XIcon className="size-3.5" />
@@ -63,7 +63,7 @@ export function TableEditor() {
       <div className="flex-1 overflow-y-auto">
         {/* Table name */}
         <div className="px-3 pt-3 pb-2">
-          <Label className="mb-1.5 text-[10px] tracking-wider text-muted-foreground uppercase">
+          <Label className="text-muted-foreground mb-1.5 text-[10px] tracking-wider uppercase">
             Name
           </Label>
           <Input
@@ -78,20 +78,20 @@ export function TableEditor() {
         {/* Columns */}
         <div className="px-3 pt-2 pb-1">
           <div className="mb-1 flex items-center justify-between">
-            <Label className="text-[10px] tracking-wider text-muted-foreground uppercase">
+            <Label className="text-muted-foreground text-[10px] tracking-wider uppercase">
               Columns
             </Label>
-            <span className="text-[10px] tabular-nums text-muted-foreground">
+            <span className="text-muted-foreground text-[10px] tabular-nums">
               {table.columns.length}
             </span>
           </div>
 
           {table.columns.length === 0 ? (
-            <div className="py-4 text-center text-[11px] italic text-muted-foreground">
+            <div className="text-muted-foreground py-4 text-center text-[11px] italic">
               No columns yet
             </div>
           ) : (
-            <div className="divide-y divide-border/50">
+            <div className="divide-border/50 divide-y">
               {table.columns.map((col) => (
                 <ColumnRow
                   key={col.id}
@@ -124,7 +124,7 @@ export function TableEditor() {
             <Button
               variant="outline"
               size="sm"
-              className="w-full gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive w-full gap-1.5"
             >
               <Trash2Icon className="size-3" />
               Delete Table
@@ -142,5 +142,5 @@ export function TableEditor() {
         />
       </div>
     </div>
-  );
+  )
 }

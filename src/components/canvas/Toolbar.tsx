@@ -1,6 +1,6 @@
-import { useCallback, useRef, useState } from "react";
-import { useReactFlow } from "@xyflow/react";
-import { toast } from "sonner";
+import { useCallback, useRef, useState } from 'react'
+import { useReactFlow } from '@xyflow/react'
+import { toast } from 'sonner'
 import {
   DownloadIcon,
   FilePlusIcon,
@@ -14,148 +14,165 @@ import {
   TableIcon,
   Undo2Icon,
   UploadIcon,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useSchemaStore, useTemporalStore } from "@/hooks/useSchemaStore";
-import { useShareUrl } from "@/hooks/useShareUrl";
-import { downloadAsJSON, downloadAsSQL, importFromFile } from "@/services/export-import";
-import { LoadDialog } from "@/components/panels/LoadDialog";
-import { ColumnConstraint, ColumnType } from "@/types/schema";
+} from '@/components/ui/dropdown-menu'
+import { useSchemaStore, useTemporalStore } from '@/hooks/useSchemaStore'
+import { useShareUrl } from '@/hooks/useShareUrl'
+import {
+  downloadAsJSON,
+  downloadAsSQL,
+  importFromFile,
+} from '@/services/export-import'
+import { LoadDialog } from '@/components/panels/LoadDialog'
+import { ColumnConstraint, ColumnType } from '@/types/schema'
 
 export function Toolbar() {
-  const addTable = useSchemaStore((s) => s.addTable);
-  const addTableWithColumns = useSchemaStore((s) => s.addTableWithColumns);
-  const schema = useSchemaStore((s) => s.schema);
-  const schemaName = useSchemaStore((s) => s.schemaName);
-  const setSchemaName = useSchemaStore((s) => s.setSchemaName);
-  const setSchema = useSchemaStore((s) => s.setSchema);
-  const newSchema = useSchemaStore((s) => s.newSchema);
-  const { getViewport } = useReactFlow();
-  const { copyShareUrl } = useShareUrl();
-  const pastStates = useTemporalStore((s) => s.pastStates);
-  const futureStates = useTemporalStore((s) => s.futureStates);
-  const undo = useTemporalStore((s) => s.undo);
-  const redo = useTemporalStore((s) => s.redo);
+  const addTable = useSchemaStore((s) => s.addTable)
+  const addTableWithColumns = useSchemaStore((s) => s.addTableWithColumns)
+  const schema = useSchemaStore((s) => s.schema)
+  const schemaName = useSchemaStore((s) => s.schemaName)
+  const setSchemaName = useSchemaStore((s) => s.setSchemaName)
+  const setSchema = useSchemaStore((s) => s.setSchema)
+  const newSchema = useSchemaStore((s) => s.newSchema)
+  const { getViewport } = useReactFlow()
+  const { copyShareUrl } = useShareUrl()
+  const pastStates = useTemporalStore((s) => s.pastStates)
+  const futureStates = useTemporalStore((s) => s.futureStates)
+  const undo = useTemporalStore((s) => s.undo)
+  const redo = useTemporalStore((s) => s.redo)
 
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [loadOpen, setLoadOpen] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [editValue, setEditValue] = useState("");
-  const nameInputRef = useRef<HTMLInputElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [loadOpen, setLoadOpen] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [editValue, setEditValue] = useState('')
+  const nameInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   function startEditing() {
-    setEditValue(schemaName);
-    setEditing(true);
-    requestAnimationFrame(() => nameInputRef.current?.select());
+    setEditValue(schemaName)
+    setEditing(true)
+    requestAnimationFrame(() => nameInputRef.current?.select())
   }
 
   function commitName() {
-    const trimmed = editValue.trim();
+    const trimmed = editValue.trim()
     if (trimmed && trimmed !== schemaName) {
-      setSchemaName(trimmed);
+      setSchemaName(trimmed)
     }
-    setEditing(false);
+    setEditing(false)
   }
 
   const handleAddTable = useCallback(() => {
-    const { x, y, zoom } = getViewport();
-    const centerX = (-x + window.innerWidth / 2) / zoom;
-    const centerY = (-y + window.innerHeight / 2) / zoom;
-    const offsetX = (Math.random() - 0.5) * 100;
-    const offsetY = (Math.random() - 0.5) * 100;
+    const { x, y, zoom } = getViewport()
+    const centerX = (-x + window.innerWidth / 2) / zoom
+    const centerY = (-y + window.innerHeight / 2) / zoom
+    const offsetX = (Math.random() - 0.5) * 100
+    const offsetY = (Math.random() - 0.5) * 100
 
     addTable(`table_${Date.now()}`, {
       x: Math.round(centerX + offsetX),
       y: Math.round(centerY + offsetY),
-    });
-  }, [addTable, getViewport]);
+    })
+  }, [addTable, getViewport])
 
   const handleAddSampleTable = useCallback(() => {
-    const { x, y, zoom } = getViewport();
-    const centerX = (-x + window.innerWidth / 2) / zoom;
-    const centerY = (-y + window.innerHeight / 2) / zoom;
+    const { x, y, zoom } = getViewport()
+    const centerX = (-x + window.innerWidth / 2) / zoom
+    const centerY = (-y + window.innerHeight / 2) / zoom
 
     addTableWithColumns(
-      "users",
+      'users',
       { x: Math.round(centerX), y: Math.round(centerY) },
       [
         {
-          name: "email",
+          name: 'email',
           type: ColumnType.VARCHAR,
           constraints: [ColumnConstraint.NOT_NULL, ColumnConstraint.UNIQUE],
         },
         {
-          name: "name",
+          name: 'name',
           type: ColumnType.VARCHAR,
           constraints: [],
         },
-      ],
-    );
-  }, [addTableWithColumns, getViewport]);
+      ]
+    )
+  }, [addTableWithColumns, getViewport])
 
   async function handleShare() {
     try {
-      await copyShareUrl();
-      toast.success("Share URL copied");
+      await copyShareUrl()
+      toast.success('Share URL copied')
     } catch {
-      toast.error("Failed to copy URL");
+      toast.error('Failed to copy URL')
     }
   }
 
   function handleExportJSON() {
-    const filename = schemaName ? `${schemaName}.json` : undefined;
-    downloadAsJSON(schema, filename);
+    const filename = schemaName ? `${schemaName}.json` : undefined
+    downloadAsJSON(schema, filename)
   }
 
   function handleExportSQL() {
-    const filename = schemaName ? `${schemaName}.sql` : undefined;
-    downloadAsSQL(schema, filename);
+    const filename = schemaName ? `${schemaName}.sql` : undefined
+    downloadAsSQL(schema, filename)
   }
 
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = e.target.files?.[0]
+    if (!file) return
     try {
-      const imported = await importFromFile(file);
-      useSchemaStore.getState().newSchema();
-      setSchema(imported);
-      toast.success(`Imported "${file.name}"`);
+      const imported = await importFromFile(file)
+      useSchemaStore.getState().newSchema()
+      setSchema(imported)
+      toast.success(`Imported "${file.name}"`)
     } catch {
-      toast.error("Invalid schema file");
+      toast.error('Invalid schema file')
     }
-    e.target.value = "";
+    e.target.value = ''
   }
 
   return (
     <>
       {/* Top-left hamburger menu */}
-      <div className="absolute top-4 left-4 z-10 rounded-lg border border-border bg-card/95 shadow-lg backdrop-blur-sm">
+      <div className="border-border bg-card/95 absolute top-4 left-4 z-10 rounded-lg border shadow-lg backdrop-blur-sm">
         <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
           <Tooltip>
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="m-0.5 flex size-8 items-center justify-center p-0">
-                  <MenuIcon className={`absolute size-5 transition-all duration-200 ${menuOpen ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"}`} />
-                  <XIcon className={`absolute size-5 transition-all duration-200 ${menuOpen ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"}`} />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="m-0.5 flex size-8 items-center justify-center p-0"
+                >
+                  <MenuIcon
+                    className={`absolute size-5 transition-all duration-200 ${menuOpen ? 'scale-0 rotate-90 opacity-0' : 'scale-100 rotate-0 opacity-100'}`}
+                  />
+                  <XIcon
+                    className={`absolute size-5 transition-all duration-200 ${menuOpen ? 'scale-100 rotate-0 opacity-100' : 'scale-0 -rotate-90 opacity-0'}`}
+                  />
                 </Button>
               </DropdownMenuTrigger>
             </TooltipTrigger>
             <TooltipContent>Menu</TooltipContent>
           </Tooltip>
           <DropdownMenuContent align="start">
-            <DropdownMenuItem onClick={() => { newSchema(); toast.success("New schema created"); }}>
+            <DropdownMenuItem
+              onClick={() => {
+                newSchema()
+                toast.success('New schema created')
+              }}
+            >
               <FilePlusIcon className="size-3.5" />
               New
             </DropdownMenuItem>
@@ -192,18 +209,18 @@ export function Toolbar() {
       </div>
 
       {/* Toolbar — schema name + actions */}
-      <div className="absolute top-4 right-4 z-10 flex items-center gap-1 rounded-lg border border-border bg-card/95 px-2 py-1.5 shadow-lg backdrop-blur-sm">
+      <div className="border-border bg-card/95 absolute top-4 right-4 z-10 flex items-center gap-1 rounded-lg border px-2 py-1.5 shadow-lg backdrop-blur-sm">
         {/* Schema name (inline editable) */}
         {editing ? (
           <input
             ref={nameInputRef}
-            className="mx-1 w-24 rounded border border-primary bg-background px-1.5 py-0.5 text-xs font-semibold text-foreground outline-none ring-1 ring-primary/30 md:w-32"
+            className="border-primary bg-background text-foreground ring-primary/30 mx-1 w-24 rounded border px-1.5 py-0.5 text-xs font-semibold ring-1 outline-none md:w-32"
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={commitName}
             onKeyDown={(e) => {
-              if (e.key === "Enter") commitName();
-              if (e.key === "Escape") setEditing(false);
+              if (e.key === 'Enter') commitName()
+              if (e.key === 'Escape') setEditing(false)
             }}
           />
         ) : (
@@ -212,18 +229,18 @@ export function Toolbar() {
               <Button
                 variant="ghost"
                 size="xs"
-                className="group mx-1 max-w-20 gap-1.5 border border-dashed border-transparent font-semibold hover:border-border md:max-w-40"
+                className="group hover:border-border mx-1 max-w-20 gap-1.5 border border-dashed border-transparent font-semibold md:max-w-40"
                 onClick={startEditing}
               >
                 <span className="truncate">{schemaName}</span>
-                <PencilIcon className="size-2.5 shrink-0 text-muted-foreground/0 transition-colors group-hover:text-muted-foreground" />
+                <PencilIcon className="text-muted-foreground/0 group-hover:text-muted-foreground size-2.5 shrink-0 transition-colors" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Click to rename</TooltipContent>
           </Tooltip>
         )}
 
-        <div className="mx-1 h-5 w-px bg-border" />
+        <div className="bg-border mx-1 h-5 w-px" />
         {/* Add Table / Sample */}
         <Tooltip>
           <TooltipTrigger asChild>
@@ -242,10 +259,12 @@ export function Toolbar() {
               <span className="hidden md:inline">Sample</span>
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Add a sample "users" table with columns</TooltipContent>
+          <TooltipContent>
+            Add a sample "users" table with columns
+          </TooltipContent>
         </Tooltip>
 
-        <div className="mx-1 h-5 w-px bg-border" />
+        <div className="bg-border mx-1 h-5 w-px" />
 
         {/* Undo / Redo */}
         <Tooltip>
@@ -279,5 +298,5 @@ export function Toolbar() {
 
       <LoadDialog open={loadOpen} onOpenChange={setLoadOpen} />
     </>
-  );
+  )
 }

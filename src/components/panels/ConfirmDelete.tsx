@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,13 +9,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog'
 
 interface ConfirmDeleteProps {
-  trigger: ReactNode;
-  title: string;
-  description: ReactNode;
-  onConfirm: () => void;
+  trigger: ReactNode
+  title: string
+  description: ReactNode
+  onConfirm: () => void
 }
 
 export function ConfirmDelete({
@@ -44,5 +44,5 @@ export function ConfirmDelete({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  );
+  )
 }
