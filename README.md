@@ -2,9 +2,8 @@
 [![Deployment Status](https://img.shields.io/badge/deployment-live-brightgreen)](https://ermate.vercel.app)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-# ERMate
+# ERMate - Visual Database Schema Designer
 
-Visual database schema designer. 
 Design ER diagrams, define tables and relationships, and share via URL - no backend required.
 
 **[🚀 Try it live](https://ermate.vercel.app)**
