@@ -4,24 +4,25 @@
 
 # ERMate
 
-Visual database schema designer for developers. Design ER diagrams, define tables and relationships, and share via URL — no backend required.
+Visual database schema designer. 
+Design ER diagrams, define tables and relationships, and share via URL - no backend required.
 
 **[🚀 Try it live](https://ermate.vercel.app)**
 
 ## Features
 
-- **Visual canvas** — drag-and-drop tables on an interactive grid with zoom, pan, and fit-to-view
-- **Tables & columns** — create tables with default columns (id, created_at, updated_at); add columns with types (VARCHAR, INTEGER, BOOLEAN, TEXT, TIMESTAMP) and constraints (PRIMARY KEY, NOT NULL, UNIQUE)
-- **Relationships** — connect columns visually to define one-to-one, one-to-many, and many-to-many relationships
-- **Junction tables** — auto-generate junction tables with foreign keys for many-to-many relationships
-- **Export** — download schemas as JSON or generate SQL DDL (CREATE TABLE + ALTER TABLE with foreign keys)
-- **Import** — load schemas from previously exported JSON files
-- **Share via URL** — generate compressed shareable links with the full schema embedded in the URL hash
-- **Auto-save** — changes are automatically saved to localStorage after 1 second of inactivity
-- **Undo/redo** — full undo history for schema changes (Ctrl+Z / Ctrl+Shift+Z)
-- **Validation** — validate schemas for errors and warnings
-- **Dark mode** — toggle between light and dark themes, persisted across sessions
-- **PWA** — installable as a standalone app with offline support via service worker
+- **Visual canvas** - drag-and-drop tables on an interactive grid with zoom, pan, and fit-to-view
+- **Tables & columns** - create tables with default columns (id, created_at, updated_at); add columns with types (VARCHAR, INTEGER, BOOLEAN, TEXT, TIMESTAMP) and constraints (PRIMARY KEY, NOT NULL, UNIQUE)
+- **Relationships** - connect columns visually to define one-to-one, one-to-many, and many-to-many relationships
+- **Junction tables** - auto-generate junction tables with foreign keys for many-to-many relationships
+- **Export** - download schemas as JSON or generate SQL DDL (CREATE TABLE + ALTER TABLE with foreign keys)
+- **Import** - load schemas from previously exported JSON files
+- **Share via URL** - generate compressed shareable links with the full schema embedded in the URL hash
+- **Auto-save** - changes are automatically saved to localStorage after 1 second of inactivity
+- **Undo/redo** - full undo history for schema changes (Ctrl+Z / Ctrl+Shift+Z)
+- **Validation** - validate schemas for errors and warnings
+- **Dark mode** - toggle between light and dark themes, persisted across sessions
+- **PWA** - installable as a standalone app with offline support via service worker
 
 ## Tech Stack
 
@@ -57,7 +58,7 @@ pnpm dev
 
 ## Data Storage
 
-All data lives in the browser — no server, no database.
+All data lives in the browser - no server, no database.
 
 - **Schemas** are stored in `localStorage` under the key `ermate:schemas`
 - **Theme preference** is stored under `ermate:theme`
