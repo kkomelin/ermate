@@ -204,36 +204,36 @@ export function LogBar() {
           {activeTab === 'errors' && (
             <div role="tabpanel" id="errors-panel" aria-labelledby="errors-tab">
               {issues.length === 0 ? (
-              <div className="text-muted-foreground flex items-center justify-start gap-1.5 py-2 text-xs">
-                <CircleCheckIcon className="size-3.5 text-emerald-500" />
-                No validation issues
-              </div>
-            ) : (
-              <>
-                {errors.map((issue, i) => (
-                  <div
-                    key={`e-${i}`}
-                    className="flex items-start gap-2 text-sm"
-                  >
-                    <OctagonXIcon className="text-destructive mt-0.5 size-4 shrink-0" />
-                    <span className="text-muted-foreground">
-                      {issue.message}
-                    </span>
-                  </div>
-                ))}
-                {warnings.map((issue, i) => (
-                  <div
-                    key={`w-${i}`}
-                    className="flex items-start gap-2 text-sm"
-                  >
-                    <TriangleAlertIcon className="mt-0.5 size-4 shrink-0 text-amber-500" />
-                    <span className="text-muted-foreground">
-                      {issue.message}
-                    </span>
-                  </div>
-                ))}
-              </>
-            )}
+                <div className="text-muted-foreground flex items-center justify-start gap-1.5 py-2 text-xs">
+                  <CircleCheckIcon className="size-3.5 text-emerald-500" />
+                  No validation issues
+                </div>
+              ) : (
+                <>
+                  {errors.map((issue, i) => (
+                    <div
+                      key={`e-${i}`}
+                      className="flex items-start gap-2 text-sm"
+                    >
+                      <OctagonXIcon className="text-destructive mt-0.5 size-4 shrink-0" />
+                      <span className="text-muted-foreground">
+                        {issue.message}
+                      </span>
+                    </div>
+                  ))}
+                  {warnings.map((issue, i) => (
+                    <div
+                      key={`w-${i}`}
+                      className="flex items-start gap-2 text-sm"
+                    >
+                      <TriangleAlertIcon className="mt-0.5 size-4 shrink-0 text-amber-500" />
+                      <span className="text-muted-foreground">
+                        {issue.message}
+                      </span>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           )}
 
