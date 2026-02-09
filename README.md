@@ -1,8 +1,12 @@
-[![Tests](https://github.com/kkomelin/ermate/actions/workflows/test.yml/badge.svg)](https://github.com/kkomelin/ermate/actions/workflows/test.yml) 
+[![Tests](https://github.com/kkomelin/ermate/actions/workflows/test.yml/badge.svg)](https://github.com/kkomelin/ermate/actions/workflows/test.yml)
+[![Deployment Status](https://img.shields.io/badge/deployment-live-brightgreen)](https://ermate.vercel.app)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 # ERMate
 
 Visual database schema designer for developers. Design ER diagrams, define tables and relationships, and share via URL — no backend required.
+
+**[🚀 Try it live](https://ermate.vercel.app)**
 
 ## Features
 
