@@ -116,7 +116,15 @@ export function SchemaCanvas() {
           type: 'smoothstep',
           animated: rel.type === RelationshipType.ONE_TO_MANY,
           label: rel.type,
-          labelStyle: { fontSize: 10, fontFamily: 'monospace' },
+          labelStyle: {
+            fontSize: 10,
+            fontFamily: 'monospace',
+            fill: 'var(--color-foreground)',
+          },
+          labelBgStyle: {
+            fill: 'var(--color-background)',
+            fillOpacity: 0.9,
+          },
           style: {
             stroke: selected
               ? 'var(--color-primary)'
