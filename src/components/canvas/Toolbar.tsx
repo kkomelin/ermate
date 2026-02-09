@@ -15,6 +15,7 @@ import {
 import { useLogBarStore } from '@/hooks/useLogBarStore'
 import { useSchemaStore, useTemporalStore } from '@/hooks/useSchemaStore'
 import { useShareUrl } from '@/hooks/useShareUrl'
+import { useValidation } from '@/hooks/useValidation'
 import {
   downloadAsJSON,
   downloadAsSQL,
@@ -37,7 +38,7 @@ import {
   UploadIcon,
   XIcon,
 } from 'lucide-react'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 export function Toolbar() {
@@ -54,12 +55,8 @@ export function Toolbar() {
   const futureStates = useTemporalStore((s) => s.futureStates)
   const undo = useTemporalStore((s) => s.undo)
   const redo = useTemporalStore((s) => s.redo)
-  const validate = useSchemaStore((s) => s.validate)
   const toggleLogBar = useLogBarStore((s) => s.toggle)
-  const errorCount = useMemo(
-    () => validate().filter((i) => i.type === 'error').length,
-    [schema, validate]
-  )
+  const { errorCount } = useValidation()
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [loadOpen, setLoadOpen] = useState(false)

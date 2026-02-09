@@ -1,5 +1,6 @@
 import { useLogBarStore } from '@/hooks/useLogBarStore'
 import { useSchemaStore, useTemporalStore } from '@/hooks/useSchemaStore'
+import { useValidation } from '@/hooks/useValidation'
 import { cn } from '@/lib/utils'
 import type { Schema } from '@/types/schema'
 import {
@@ -85,12 +86,8 @@ function describeChange(prev: Schema, curr: Schema): string {
 
 export function LogBar() {
   const schema = useSchemaStore((s) => s.schema)
-  const validate = useSchemaStore((s) => s.validate)
   const pastStates = useTemporalStore((s) => s.pastStates)
-
-  const issues = useMemo(() => validate(), [schema, validate])
-  const errors = issues.filter((i) => i.type === 'error')
-  const warnings = issues.filter((i) => i.type === 'warning')
+  const { issues, errors, warnings } = useValidation()
 
   const historyEntries = useMemo(() => {
     const entries: string[] = []

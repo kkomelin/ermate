@@ -47,11 +47,6 @@ export function SchemaCanvas() {
     }
   }, [fitView])
 
-  const onSelect = useCallback(
-    (tableId: string) => selectTable(tableId),
-    [selectTable]
-  )
-
   const nodes: Node[] = useMemo(
     () =>
       schema.tables.map((table) => ({
@@ -61,11 +56,11 @@ export function SchemaCanvas() {
         data: {
           table,
           selected: table.id === selectedTableId,
-          onSelect,
+          onSelect: selectTable,
         } satisfies TableNodeData,
         selected: table.id === selectedTableId,
       })),
-    [schema.tables, selectedTableId, onSelect]
+    [schema.tables, selectedTableId, selectTable]
   )
 
   const edges: Edge[] = useMemo(
@@ -108,7 +103,7 @@ export function SchemaCanvas() {
         }
       }
     },
-    [nodes, updateTable, selectTable]
+    [updateTable, selectTable]
   )
 
   const onConnect: OnConnect = useCallback(
