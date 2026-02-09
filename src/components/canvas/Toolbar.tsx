@@ -1,6 +1,18 @@
 import { useCallback, useRef, useState } from "react";
 import { useReactFlow } from "@xyflow/react";
 import { toast } from "sonner";
+import {
+  ChevronDownIcon,
+  DownloadIcon,
+  FolderOpenIcon,
+  PencilIcon,
+  Redo2Icon,
+  Share2Icon,
+  SquarePlusIcon,
+  TableIcon,
+  Undo2Icon,
+  UploadIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -13,27 +25,45 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useSchemaStore } from "@/hooks/useSchemaStore";
+import { useSchemaStore, useTemporalStore } from "@/hooks/useSchemaStore";
 import { useShareUrl } from "@/hooks/useShareUrl";
-import * as DalService from "@/services/dal";
 import { downloadAsJSON, downloadAsSQL, importFromFile } from "@/services/export-import";
-import { SaveDialog } from "@/components/panels/SaveDialog";
 import { LoadDialog } from "@/components/panels/LoadDialog";
 import { ColumnConstraint, ColumnType } from "@/types/schema";
 
 export function Toolbar() {
   const addTable = useSchemaStore((s) => s.addTable);
-  const addColumn = useSchemaStore((s) => s.addColumn);
+  const addTableWithColumns = useSchemaStore((s) => s.addTableWithColumns);
   const schema = useSchemaStore((s) => s.schema);
-  const schemaId = useSchemaStore((s) => s.schemaId);
   const schemaName = useSchemaStore((s) => s.schemaName);
+  const setSchemaName = useSchemaStore((s) => s.setSchemaName);
   const setSchema = useSchemaStore((s) => s.setSchema);
   const { getViewport } = useReactFlow();
   const { copyShareUrl } = useShareUrl();
+  const pastStates = useTemporalStore((s) => s.pastStates);
+  const futureStates = useTemporalStore((s) => s.futureStates);
+  const undo = useTemporalStore((s) => s.undo);
+  const redo = useTemporalStore((s) => s.redo);
 
-  const [saveOpen, setSaveOpen] = useState(false);
   const [loadOpen, setLoadOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState("");
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function startEditing() {
+    setEditValue(schemaName);
+    setEditing(true);
+    requestAnimationFrame(() => nameInputRef.current?.select());
+  }
+
+  function commitName() {
+    const trimmed = editValue.trim();
+    if (trimmed && trimmed !== schemaName) {
+      setSchemaName(trimmed);
+    }
+    setEditing(false);
+  }
 
   const handleAddTable = useCallback(() => {
     const { x, y, zoom } = getViewport();
@@ -53,41 +83,23 @@ export function Toolbar() {
     const centerX = (-x + window.innerWidth / 2) / zoom;
     const centerY = (-y + window.innerHeight / 2) / zoom;
 
-    addTable("users", { x: Math.round(centerX), y: Math.round(centerY) });
-
-    const currentSchema = useSchemaStore.getState().schema;
-    const newTable = currentSchema.tables[currentSchema.tables.length - 1];
-
-    addColumn(newTable.id, {
-      name: "id",
-      type: ColumnType.INTEGER,
-      constraints: [ColumnConstraint.PRIMARY_KEY, ColumnConstraint.NOT_NULL],
-    });
-    addColumn(newTable.id, {
-      name: "email",
-      type: ColumnType.VARCHAR,
-      constraints: [ColumnConstraint.NOT_NULL, ColumnConstraint.UNIQUE],
-    });
-    addColumn(newTable.id, {
-      name: "name",
-      type: ColumnType.VARCHAR,
-      constraints: [],
-    });
-    addColumn(newTable.id, {
-      name: "created_at",
-      type: ColumnType.TIMESTAMP,
-      constraints: [ColumnConstraint.NOT_NULL],
-    });
-  }, [addTable, addColumn, getViewport]);
-
-  function handleSave() {
-    if (schemaId) {
-      DalService.saveSchema(schemaId, schemaName, schema);
-      toast.success("Saved");
-    } else {
-      setSaveOpen(true);
-    }
-  }
+    addTableWithColumns(
+      "users",
+      { x: Math.round(centerX), y: Math.round(centerY) },
+      [
+        {
+          name: "email",
+          type: ColumnType.VARCHAR,
+          constraints: [ColumnConstraint.NOT_NULL, ColumnConstraint.UNIQUE],
+        },
+        {
+          name: "name",
+          type: ColumnType.VARCHAR,
+          constraints: [],
+        },
+      ],
+    );
+  }, [addTableWithColumns, getViewport]);
 
   async function handleShare() {
     try {
@@ -99,12 +111,12 @@ export function Toolbar() {
   }
 
   function handleExportJSON() {
-    const filename = schemaName !== "Untitled" ? `${schemaName}.json` : undefined;
+    const filename = schemaName ? `${schemaName}.json` : undefined;
     downloadAsJSON(schema, filename);
   }
 
   function handleExportSQL() {
-    const filename = schemaName !== "Untitled" ? `${schemaName}.sql` : undefined;
+    const filename = schemaName ? `${schemaName}.sql` : undefined;
     downloadAsSQL(schema, filename);
   }
 
@@ -113,55 +125,55 @@ export function Toolbar() {
     if (!file) return;
     try {
       const imported = await importFromFile(file);
-      // Load as new unsaved schema
       useSchemaStore.getState().newSchema();
       setSchema(imported);
       toast.success(`Imported "${file.name}"`);
     } catch {
       toast.error("Invalid schema file");
     }
-    // Reset input so same file can be re-imported
     e.target.value = "";
   }
-
-  const displayName = schemaName !== "Untitled" ? schemaName : null;
 
   return (
     <>
       <div className="absolute top-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 rounded-lg border border-border bg-card/95 px-2 py-1.5 shadow-lg backdrop-blur-sm">
-        {/* Brand / schema name */}
-        <span className="mr-1 flex items-center gap-1.5 px-2 text-xs font-bold tracking-tight text-card-foreground">
-          ERMate
-          {displayName && (
-            <>
-              <span className="font-normal text-muted-foreground">/</span>
-              <span className="max-w-24 truncate font-medium">{displayName}</span>
-            </>
-          )}
-        </span>
+        {/* Schema name (inline editable) */}
+        {editing ? (
+          <input
+            ref={nameInputRef}
+            className="mx-1 w-32 rounded border border-primary bg-background px-1.5 py-0.5 text-xs font-semibold text-foreground outline-none ring-1 ring-primary/30"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={commitName}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitName();
+              if (e.key === "Escape") setEditing(false);
+            }}
+          />
+        ) : (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="xs"
+                className="group mx-1 max-w-40 gap-1.5 border border-dashed border-transparent font-semibold hover:border-border"
+                onClick={startEditing}
+              >
+                <span className="truncate">{schemaName}</span>
+                <PencilIcon className="size-2.5 shrink-0 text-muted-foreground/0 transition-colors group-hover:text-muted-foreground" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Click to rename</TooltipContent>
+          </Tooltip>
+        )}
 
         <div className="mx-1 h-5 w-px bg-border" />
 
-        {/* Save / Load */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="xs" onClick={handleSave}>
-              <svg className="size-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M12.5 14H3.5a1 1 0 01-1-1V3a1 1 0 011-1h7l3 3v8a1 1 0 01-1 1z" />
-                <path d="M10 14V9H6v5M6 2v3h4" />
-              </svg>
-              <span>Save</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Save schema to browser storage</TooltipContent>
-        </Tooltip>
-
+        {/* Load */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="xs" onClick={() => setLoadOpen(true)}>
-              <svg className="size-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M2.5 5V3a1 1 0 011-1h3l1.5 2h5a1 1 0 011 1v7a1 1 0 01-1 1h-10a1 1 0 01-1-1V5z" />
-              </svg>
+              <FolderOpenIcon className="size-3.5" />
               <span>Load</span>
             </Button>
           </TooltipTrigger>
@@ -170,15 +182,11 @@ export function Toolbar() {
 
         <div className="mx-1 h-5 w-px bg-border" />
 
-        {/* Add Table / Sample */}
+        {/* Add Table / Sample / Undo / Redo */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="xs" onClick={handleAddTable}>
-              <svg className="size-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <rect x="2" y="2" width="12" height="12" rx="2" />
-                <line x1="8" y1="5" x2="8" y2="11" />
-                <line x1="5" y1="8" x2="11" y2="8" />
-              </svg>
+              <SquarePlusIcon className="size-3.5" />
               <span>Add Table</span>
             </Button>
           </TooltipTrigger>
@@ -188,49 +196,52 @@ export function Toolbar() {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="xs" onClick={handleAddSampleTable}>
-              <svg className="size-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <rect x="2" y="2" width="12" height="12" rx="2" />
-                <line x1="2" y1="6" x2="14" y2="6" />
-                <line x1="2" y1="10" x2="14" y2="10" />
-                <line x1="6" y1="6" x2="6" y2="14" />
-              </svg>
+              <TableIcon className="size-3.5" />
               <span>Sample</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>Add a sample "users" table with columns</TooltipContent>
         </Tooltip>
 
-        <div className="mx-1 h-5 w-px bg-border" />
-
-        {/* Share / Export / Import */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="xs" onClick={handleShare}>
-              <svg className="size-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <circle cx="12" cy="3.5" r="1.5" />
-                <circle cx="4" cy="8" r="1.5" />
-                <circle cx="12" cy="12.5" r="1.5" />
-                <line x1="5.4" y1="7.1" x2="10.6" y2="4.4" />
-                <line x1="5.4" y1="8.9" x2="10.6" y2="11.6" />
-              </svg>
-              <span>Share</span>
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => undo()}
+              disabled={pastStates.length === 0}
+            >
+              <Undo2Icon className="size-3.5" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Copy shareable URL to clipboard</TooltipContent>
+          <TooltipContent>Undo (Ctrl+Z)</TooltipContent>
         </Tooltip>
 
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => redo()}
+              disabled={futureStates.length === 0}
+            >
+              <Redo2Icon className="size-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Redo (Ctrl+Shift+Z)</TooltipContent>
+        </Tooltip>
+
+        <div className="mx-1 h-5 w-px bg-border" />
+
+        {/* Export / Import */}
         <DropdownMenu>
           <Tooltip>
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="xs">
-                  <svg className="size-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M8 2v8M4.5 6.5L8 10l3.5-3.5M3 12.5h10" />
-                  </svg>
+                  <DownloadIcon className="size-3.5" />
                   <span>Export</span>
-                  <svg className="size-2.5 ml-0.5 opacity-60" viewBox="0 0 10 10" fill="currentColor">
-                    <path d="M2 4l3 3 3-3z" />
-                  </svg>
+                  <ChevronDownIcon className="size-2.5 ml-0.5 opacity-60" />
                 </Button>
               </DropdownMenuTrigger>
             </TooltipTrigger>
@@ -249,9 +260,7 @@ export function Toolbar() {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="xs" onClick={() => fileInputRef.current?.click()}>
-              <svg className="size-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M8 14V6M4.5 9.5L8 6l3.5 3.5M3 3.5h10" />
-              </svg>
+              <UploadIcon className="size-3.5" />
               <span>Import</span>
             </Button>
           </TooltipTrigger>
@@ -265,9 +274,22 @@ export function Toolbar() {
           className="hidden"
           onChange={handleImport}
         />
+
+        <div className="mx-1 h-5 w-px bg-border" />
+
+        {/* Share */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="xs" onClick={handleShare}>
+              <Share2Icon className="size-3.5" />
+              <span>Share</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Copy shareable URL to clipboard</TooltipContent>
+        </Tooltip>
+
       </div>
 
-      <SaveDialog open={saveOpen} onOpenChange={setSaveOpen} />
       <LoadDialog open={loadOpen} onOpenChange={setLoadOpen} />
     </>
   );

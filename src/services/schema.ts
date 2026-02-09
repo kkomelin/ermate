@@ -6,7 +6,7 @@ import type {
   Table,
   ValidationError,
 } from "@/types/schema";
-import { ColumnConstraint, RelationshipType } from "@/types/schema";
+import { ColumnConstraint, ColumnType, RelationshipType } from "@/types/schema";
 
 let counter = 0;
 
@@ -31,7 +31,61 @@ export function addTable(
     id: uid("t"),
     name,
     position,
-    columns: [],
+    columns: [
+      {
+        id: uid("c"),
+        name: "id",
+        type: ColumnType.INTEGER,
+        constraints: [ColumnConstraint.PRIMARY_KEY, ColumnConstraint.NOT_NULL],
+      },
+      {
+        id: uid("c"),
+        name: "created_at",
+        type: ColumnType.TIMESTAMP,
+        constraints: [ColumnConstraint.NOT_NULL],
+      },
+      {
+        id: uid("c"),
+        name: "updated_at",
+        type: ColumnType.TIMESTAMP,
+        constraints: [ColumnConstraint.NOT_NULL],
+      },
+    ],
+  };
+  return { ...schema, tables: [...schema.tables, table] };
+}
+
+export function addTableWithColumns(
+  schema: Schema,
+  name: string,
+  position: Position,
+  extraColumns: Omit<Column, "id">[],
+): Schema {
+  const table: Table = {
+    id: uid("t"),
+    name,
+    position,
+    columns: [
+      {
+        id: uid("c"),
+        name: "id",
+        type: ColumnType.INTEGER,
+        constraints: [ColumnConstraint.PRIMARY_KEY, ColumnConstraint.NOT_NULL],
+      },
+      ...extraColumns.map((col) => ({ ...col, id: uid("c") })),
+      {
+        id: uid("c"),
+        name: "created_at",
+        type: ColumnType.TIMESTAMP,
+        constraints: [ColumnConstraint.NOT_NULL],
+      },
+      {
+        id: uid("c"),
+        name: "updated_at",
+        type: ColumnType.TIMESTAMP,
+        constraints: [ColumnConstraint.NOT_NULL],
+      },
+    ],
   };
   return { ...schema, tables: [...schema.tables, table] };
 }

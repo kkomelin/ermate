@@ -63,6 +63,16 @@ export function saveSchema(
   return meta;
 }
 
+export function nextUntitledName(
+  storage: DalStorage = localStorage,
+): string {
+  const existing = listSchemas(storage);
+  const used = new Set(existing.map((s) => s.name));
+  let n = 1;
+  while (used.has(`Untitled ${n}`)) n++;
+  return `Untitled ${n}`;
+}
+
 export function deleteSchema(
   id: string,
   storage: DalStorage = localStorage,

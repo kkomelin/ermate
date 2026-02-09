@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { KeyRoundIcon } from "lucide-react";
 import type { Table } from "@/types/schema";
 import { ColumnConstraint } from "@/types/schema";
 import { cn } from "@/lib/utils";
@@ -61,13 +62,7 @@ function TableNodeComponent({ data }: NodeProps) {
         )}
       >
         {hasPk && (
-          <svg
-            className="size-3.5 shrink-0 text-amber-500"
-            viewBox="0 0 16 16"
-            fill="currentColor"
-          >
-            <path d="M8 1a4 4 0 0 0-4 4c0 1.5.8 2.7 2 3.4V14a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V8.4A4 4 0 0 0 8 1zm0 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm-1 7h2v3H7v-3z" />
-          </svg>
+          <KeyRoundIcon className="size-3.5 shrink-0 text-amber-500" />
         )}
         <span className="truncate font-semibold text-card-foreground">
           {table.name}
@@ -109,13 +104,7 @@ function TableNodeComponent({ data }: NodeProps) {
 
                 {/* PK icon */}
                 {isPk && (
-                  <svg
-                    className="size-3 shrink-0 text-amber-500"
-                    viewBox="0 0 16 16"
-                    fill="currentColor"
-                  >
-                    <path d="M8 1a4 4 0 0 0-4 4c0 1.5.8 2.7 2 3.4V14a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V8.4A4 4 0 0 0 8 1zm0 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
-                  </svg>
+                  <KeyRoundIcon className="size-3 shrink-0 text-amber-500" />
                 )}
 
                 {/* Column name */}

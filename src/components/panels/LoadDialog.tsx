@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Trash2Icon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -101,15 +102,7 @@ export function LoadDialog({ open, onOpenChange }: LoadDialogProps) {
                   <ConfirmDelete
                     trigger={
                       <Button variant="ghost" size="icon-xs">
-                        <svg
-                          className="size-3"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                        >
-                          <path d="M3 4h10M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1M6.5 7v4M9.5 7v4M4.5 4l.5 8.5a1 1 0 001 .5h4a1 1 0 001-.5L11.5 4" />
-                        </svg>
+                        <Trash2Icon className="size-3" />
                       </Button>
                     }
                     title="Delete Schema"

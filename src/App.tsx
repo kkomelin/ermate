@@ -7,14 +7,13 @@ import { TableEditor } from "@/components/panels/TableEditor";
 import { RelationshipEditor } from "@/components/panels/RelationshipEditor";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { useShareUrl } from "@/hooks/useShareUrl";
-import { useSchemaStore } from "@/hooks/useSchemaStore";
+import { useTheme } from "@/hooks/useTheme";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 function AppInner() {
-  const schemaId = useSchemaStore((s) => s.schemaId);
-  const schemaName = useSchemaStore((s) => s.schemaName);
-
-  useAutoSave(schemaId, schemaName);
+  useAutoSave();
   useShareUrl();
+  useKeyboardShortcuts();
 
   return (
     <div className="relative h-screen w-screen overflow-hidden">
@@ -27,11 +26,13 @@ function AppInner() {
 }
 
 function App() {
+  const { theme } = useTheme();
+
   return (
     <TooltipProvider>
       <ReactFlowProvider>
         <AppInner />
-        <Toaster position="bottom-center" richColors />
+        <Toaster position="bottom-center" richColors theme={theme} />
       </ReactFlowProvider>
     </TooltipProvider>
   );

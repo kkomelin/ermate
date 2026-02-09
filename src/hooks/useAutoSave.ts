@@ -5,13 +5,13 @@ import { useSchemaStore } from "@/hooks/useSchemaStore";
 
 const AUTO_SAVE_DELAY = 1000;
 
-export function useAutoSave(schemaId: string | null, schemaName: string) {
+export function useAutoSave() {
   const schema = useSchemaStore((s) => s.schema);
+  const schemaId = useSchemaStore((s) => s.schemaId);
+  const schemaName = useSchemaStore((s) => s.schemaName);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!schemaId) return;
-
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
     timeoutRef.current = setTimeout(() => {

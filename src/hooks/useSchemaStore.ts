@@ -1,4 +1,7 @@
 import { create } from "zustand";
+import { temporal } from "zundo";
+import { useStoreWithEqualityFn } from "zustand/traditional";
+import type { TemporalState } from "zundo";
 
 import type {
   Column,
@@ -9,6 +12,7 @@ import type {
   ValidationError,
 } from "@/types/schema";
 import * as SchemaService from "@/services/schema";
+import * as DalService from "@/services/dal";
 
 interface SchemaState {
   schema: Schema;
@@ -31,6 +35,11 @@ interface SchemaState {
 
   // Tables
   addTable: (name: string, position: Position) => void;
+  addTableWithColumns: (
+    name: string,
+    position: Position,
+    extraColumns: Omit<Column, "id">[],
+  ) => void;
   updateTable: (
     tableId: string,
     updates: Partial<Pick<import("../types/schema").Table, "name" | "position">>,
@@ -71,104 +80,141 @@ interface SchemaState {
   validate: () => ValidationError[];
 }
 
-export const useSchemaStore = create<SchemaState>((set, get) => ({
-  schema: SchemaService.createEmptySchema(),
-  schemaId: null,
-  schemaName: "Untitled",
-  selectedTableId: null,
-  selectedRelationshipId: null,
-  pendingConnection: null,
+type PartializedState = Pick<SchemaState, "schema">;
 
-  setSchema: (schema) => set({ schema }),
-  resetSchema: () =>
-    set({
+export const useSchemaStore = create<SchemaState>()(
+  temporal(
+    (set, get) => ({
       schema: SchemaService.createEmptySchema(),
-      schemaId: null,
-      schemaName: "Untitled",
+      schemaId: crypto.randomUUID(),
+      schemaName: DalService.nextUntitledName(),
       selectedTableId: null,
       selectedRelationshipId: null,
       pendingConnection: null,
+
+      setSchema: (schema) => set({ schema }),
+      resetSchema: () => {
+        const name = DalService.nextUntitledName();
+        set({
+          schema: SchemaService.createEmptySchema(),
+          schemaId: crypto.randomUUID(),
+          schemaName: name,
+          selectedTableId: null,
+          selectedRelationshipId: null,
+          pendingConnection: null,
+        });
+      },
+      setSchemaIdentity: (id, name) => set({ schemaId: id, schemaName: name }),
+      setSchemaName: (name) => set({ schemaName: name }),
+      loadSchema: (id, name, schema) =>
+        set({
+          schema,
+          schemaId: id,
+          schemaName: name,
+          selectedTableId: null,
+          selectedRelationshipId: null,
+          pendingConnection: null,
+        }),
+      newSchema: () => {
+        const name = DalService.nextUntitledName();
+        set({
+          schema: SchemaService.createEmptySchema(),
+          schemaId: crypto.randomUUID(),
+          schemaName: name,
+          selectedTableId: null,
+          selectedRelationshipId: null,
+          pendingConnection: null,
+        });
+      },
+
+      // Tables
+      addTable: (name, position) =>
+        set((s) => ({
+          schema: SchemaService.addTable(s.schema, name, position),
+        })),
+      addTableWithColumns: (name, position, extraColumns) =>
+        set((s) => ({
+          schema: SchemaService.addTableWithColumns(
+            s.schema,
+            name,
+            position,
+            extraColumns,
+          ),
+        })),
+      updateTable: (tableId, updates) =>
+        set((s) => ({
+          schema: SchemaService.updateTable(s.schema, tableId, updates),
+        })),
+      removeTable: (tableId) =>
+        set((s) => ({
+          schema: SchemaService.removeTable(s.schema, tableId),
+          selectedTableId:
+            s.selectedTableId === tableId ? null : s.selectedTableId,
+        })),
+
+      // Columns
+      addColumn: (tableId, column) =>
+        set((s) => ({
+          schema: SchemaService.addColumn(s.schema, tableId, column),
+        })),
+      updateColumn: (tableId, columnId, updates) =>
+        set((s) => ({
+          schema: SchemaService.updateColumn(
+            s.schema,
+            tableId,
+            columnId,
+            updates,
+          ),
+        })),
+      removeColumn: (tableId, columnId) =>
+        set((s) => ({
+          schema: SchemaService.removeColumn(s.schema, tableId, columnId),
+        })),
+
+      // Relationships
+      addRelationship: (rel) =>
+        set((s) => ({ schema: SchemaService.addRelationship(s.schema, rel) })),
+      updateRelationship: (relId, updates) =>
+        set((s) => ({
+          schema: SchemaService.updateRelationship(s.schema, relId, updates),
+        })),
+      removeRelationship: (relId) =>
+        set((s) => ({
+          schema: SchemaService.removeRelationship(s.schema, relId),
+          selectedRelationshipId:
+            s.selectedRelationshipId === relId
+              ? null
+              : s.selectedRelationshipId,
+        })),
+      generateJunctionTable: (sourceTableId, targetTableId) =>
+        set((s) => ({
+          schema: SchemaService.generateJunctionTable(
+            s.schema,
+            sourceTableId,
+            targetTableId,
+          ),
+        })),
+
+      // Pending connection
+      setPendingConnection: (conn) => set({ pendingConnection: conn }),
+
+      // Selection
+      selectTable: (tableId) =>
+        set({ selectedTableId: tableId, selectedRelationshipId: null }),
+      selectRelationship: (relId) =>
+        set({ selectedRelationshipId: relId, selectedTableId: null }),
+
+      // Validation
+      validate: () => SchemaService.validate(get().schema),
     }),
-  setSchemaIdentity: (id, name) => set({ schemaId: id, schemaName: name }),
-  setSchemaName: (name) => set({ schemaName: name }),
-  loadSchema: (id, name, schema) =>
-    set({
-      schema,
-      schemaId: id,
-      schemaName: name,
-      selectedTableId: null,
-      selectedRelationshipId: null,
-      pendingConnection: null,
-    }),
-  newSchema: () =>
-    set({
-      schema: SchemaService.createEmptySchema(),
-      schemaId: null,
-      schemaName: "Untitled",
-      selectedTableId: null,
-      selectedRelationshipId: null,
-      pendingConnection: null,
-    }),
+    {
+      partialize: (state) => ({ schema: state.schema }) as PartializedState,
+    },
+  ),
+);
 
-  // Tables
-  addTable: (name, position) =>
-    set((s) => ({ schema: SchemaService.addTable(s.schema, name, position) })),
-  updateTable: (tableId, updates) =>
-    set((s) => ({
-      schema: SchemaService.updateTable(s.schema, tableId, updates),
-    })),
-  removeTable: (tableId) =>
-    set((s) => ({
-      schema: SchemaService.removeTable(s.schema, tableId),
-      selectedTableId:
-        s.selectedTableId === tableId ? null : s.selectedTableId,
-    })),
-
-  // Columns
-  addColumn: (tableId, column) =>
-    set((s) => ({
-      schema: SchemaService.addColumn(s.schema, tableId, column),
-    })),
-  updateColumn: (tableId, columnId, updates) =>
-    set((s) => ({
-      schema: SchemaService.updateColumn(s.schema, tableId, columnId, updates),
-    })),
-  removeColumn: (tableId, columnId) =>
-    set((s) => ({
-      schema: SchemaService.removeColumn(s.schema, tableId, columnId),
-    })),
-
-  // Relationships
-  addRelationship: (rel) =>
-    set((s) => ({ schema: SchemaService.addRelationship(s.schema, rel) })),
-  updateRelationship: (relId, updates) =>
-    set((s) => ({
-      schema: SchemaService.updateRelationship(s.schema, relId, updates),
-    })),
-  removeRelationship: (relId) =>
-    set((s) => ({
-      schema: SchemaService.removeRelationship(s.schema, relId),
-      selectedRelationshipId:
-        s.selectedRelationshipId === relId ? null : s.selectedRelationshipId,
-    })),
-  generateJunctionTable: (sourceTableId, targetTableId) =>
-    set((s) => ({
-      schema: SchemaService.generateJunctionTable(
-        s.schema,
-        sourceTableId,
-        targetTableId,
-      ),
-    })),
-
-  // Pending connection
-  setPendingConnection: (conn) => set({ pendingConnection: conn }),
-
-  // Selection
-  selectTable: (tableId) =>
-    set({ selectedTableId: tableId, selectedRelationshipId: null }),
-  selectRelationship: (relId) =>
-    set({ selectedRelationshipId: relId, selectedTableId: null }),
-
-  // Validation
-  validate: () => SchemaService.validate(get().schema),
-}));
+export function useTemporalStore<T>(
+  selector: (state: TemporalState<PartializedState>) => T,
+) {
+  return useStoreWithEqualityFn(useSchemaStore.temporal, selector);
+}

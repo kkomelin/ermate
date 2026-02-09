@@ -4,14 +4,16 @@ import {
   Background,
   BackgroundVariant,
   Controls,
-  MiniMap,
   type Node,
   type Edge,
   type OnNodesChange,
   type OnConnect,
   type NodeTypes,
 } from "@xyflow/react";
+import { MoonIcon, SunIcon, TablePropertiesIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useSchemaStore } from "@/hooks/useSchemaStore";
+import { useTheme } from "@/hooks/useTheme";
 import { TableNode, type TableNodeData } from "./TableNode";
 import { RelationshipType } from "@/types/schema";
 
@@ -20,6 +22,7 @@ const nodeTypes: NodeTypes = {
 };
 
 export function SchemaCanvas() {
+  const { theme, toggleTheme } = useTheme();
   const schema = useSchemaStore((s) => s.schema);
   const selectedTableId = useSchemaStore((s) => s.selectedTableId);
   const selectedRelationshipId = useSchemaStore(
@@ -149,6 +152,7 @@ export function SchemaCanvas() {
       minZoom={0.25}
       maxZoom={2}
       className="bg-background"
+      proOptions={{ hideAttribution: true }}
     >
       <Background
         variant={BackgroundVariant.Lines}
@@ -157,11 +161,19 @@ export function SchemaCanvas() {
         color="var(--color-border)"
       />
       <Controls className="!rounded-lg !border !border-border !bg-card !shadow-md [&>button]:!border-border [&>button]:!bg-card [&>button]:!text-card-foreground [&>button]:hover:!bg-muted" />
-      <MiniMap
-        className="!rounded-lg !border !border-border !bg-card !shadow-md"
-        nodeColor="var(--color-muted)"
-        maskColor="var(--color-background)"
-      />
+      {/* ERMate branding + theme toggle */}
+      <div className="absolute right-2 bottom-2 z-10 flex items-center gap-1.5 rounded-md border border-border bg-card/90 px-2 py-1 text-xs font-semibold tracking-tight text-muted-foreground shadow-sm backdrop-blur-sm">
+        <TablePropertiesIcon className="size-3.5" />
+        ERMate
+        <div className="mx-0.5 h-3.5 w-px bg-border" />
+        <Button variant="ghost" size="icon-xs" onClick={toggleTheme} title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} className="size-5 text-muted-foreground hover:text-foreground">
+          {theme === "dark" ? (
+            <SunIcon className="size-3.5" />
+          ) : (
+            <MoonIcon className="size-3.5" />
+          )}
+        </Button>
+      </div>
     </ReactFlow>
   );
 }

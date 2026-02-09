@@ -9,3 +9,5 @@
 4. Prefer Tailwind 4 for styling.
 
 5. Use `frontend-design` skill to design the aesthetics.
+
+6. User `lucide-react` for icons.
