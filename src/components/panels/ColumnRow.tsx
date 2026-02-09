@@ -14,6 +14,7 @@ import { ConfirmDelete } from './ConfirmDelete'
 import { cn } from '@/lib/utils'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { memo } from 'react'
 
 const COLUMN_TYPES: { value: ColumnType; label: string }[] = [
   { value: CT.VARCHAR, label: 'VARCHAR' },
@@ -64,7 +65,7 @@ interface ColumnRowProps {
   onRemove: (columnId: string) => void
 }
 
-export function ColumnRow({ column, onUpdate, onRemove }: ColumnRowProps) {
+function ColumnRowComponent({ column, onUpdate, onRemove }: ColumnRowProps) {
   const {
     attributes,
     listeners,
@@ -99,7 +100,7 @@ export function ColumnRow({ column, onUpdate, onRemove }: ColumnRowProps) {
       {/* Drag handle */}
       <button
         type="button"
-        className="text-muted-foreground/40 hover:text-muted-foreground cursor-grab active:cursor-grabbing shrink-0 touch-none"
+        className="text-muted-foreground/40 hover:text-muted-foreground focus-visible:text-foreground focus-visible:outline-primary shrink-0 cursor-grab touch-none rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:cursor-grabbing"
         aria-label="Drag to reorder"
         {...attributes}
         {...listeners}
@@ -193,3 +194,5 @@ export function ColumnRow({ column, onUpdate, onRemove }: ColumnRowProps) {
     </div>
   )
 }
+
+export const ColumnRow = memo(ColumnRowComponent)

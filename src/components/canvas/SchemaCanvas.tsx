@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ReactFlow,
   Background,
   BackgroundVariant,
   Controls,
   useReactFlow,
+  applyNodeChanges,
   type Node,
   type Edge,
   type OnNodesChange,
@@ -47,21 +48,60 @@ export function SchemaCanvas() {
     }
   }, [fitView])
 
-  const nodes: Node[] = useMemo(
-    () =>
-      schema.tables.map((table) => ({
-        id: table.id,
-        type: 'table',
-        position: table.position,
-        data: {
-          table,
-          selected: table.id === selectedTableId,
-          onSelect: selectTable,
-        } satisfies TableNodeData,
+  // Store nodes in local state for React Flow
+  const [nodes, setNodes] = useState<Node[]>(() =>
+    schema.tables.map((table) => ({
+      id: table.id,
+      type: 'table',
+      position: table.position,
+      data: {
+        table,
         selected: table.id === selectedTableId,
-      })),
-    [schema.tables, selectedTableId, selectTable]
+        onSelect: selectTable,
+      } satisfies TableNodeData,
+      selected: table.id === selectedTableId,
+    }))
   )
+
+  // Sync nodes when tables are added/removed/updated (but not on selection change)
+  useEffect(() => {
+    setNodes((currentNodes) => {
+      // Create a map of current nodes by id
+      const nodeMap = new Map(currentNodes.map((n) => [n.id, n]))
+
+      // Update nodes based on schema.tables
+      return schema.tables.map((table) => {
+        const existingNode = nodeMap.get(table.id)
+
+        // If node exists, preserve React Flow's internal state
+        if (existingNode) {
+          return {
+            ...existingNode,
+            position: table.position,
+            data: {
+              table,
+              selected: table.id === selectedTableId,
+              onSelect: selectTable,
+            } satisfies TableNodeData,
+            selected: table.id === selectedTableId,
+          }
+        }
+
+        // New node
+        return {
+          id: table.id,
+          type: 'table',
+          position: table.position,
+          data: {
+            table,
+            selected: table.id === selectedTableId,
+            onSelect: selectTable,
+          } satisfies TableNodeData,
+          selected: table.id === selectedTableId,
+        }
+      })
+    })
+  }, [schema.tables, selectedTableId, selectTable])
 
   const edges: Edge[] = useMemo(
     () =>
@@ -90,8 +130,13 @@ export function SchemaCanvas() {
 
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => {
+      // Apply changes to React Flow's internal state
+      setNodes((nds) => applyNodeChanges(changes, nds))
+
+      // Sync position changes back to our store
       for (const change of changes) {
-        if (change.type === 'position' && change.position) {
+        if (change.type === 'position' && change.position && !change.dragging) {
+          // Only update store when drag is complete
           updateTable(change.id, { position: change.position })
         }
       }

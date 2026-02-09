@@ -1,6 +1,7 @@
 import { PlusIcon, Trash2Icon, XIcon } from 'lucide-react'
 import { useSchemaStore } from '@/hooks/useSchemaStore'
 import { ColumnType } from '@/types/schema'
+import type { Column } from '@/types/schema'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -22,6 +23,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
+import { useCallback, useMemo } from 'react'
 
 export function TableEditor() {
   const schema = useSchemaStore((s) => s.schema)
@@ -34,6 +36,11 @@ export function TableEditor() {
   const removeTable = useSchemaStore((s) => s.removeTable)
   const selectTable = useSchemaStore((s) => s.selectTable)
 
+  const table = selectedTableId
+    ? schema.tables.find((t) => t.id === selectedTableId)
+    : null
+
+  // All hooks must be called before any conditional returns
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -41,36 +48,63 @@ export function TableEditor() {
     })
   )
 
-  const table = selectedTableId
-    ? schema.tables.find((t) => t.id === selectedTableId)
-    : null
+  const columnIds = useMemo(
+    () => table?.columns.map((col) => col.id) ?? [],
+    [table?.columns]
+  )
 
-  if (!table) return null
-
-  const handleAddColumn = () => {
+  const handleAddColumn = useCallback(() => {
+    if (!table) return
     addColumn(table.id, {
       name: `column_${table.columns.length + 1}`,
       type: ColumnType.VARCHAR,
       constraints: [],
     })
-  }
+  }, [addColumn, table])
 
-  const handleDeleteTable = () => {
+  const handleDeleteTable = useCallback(() => {
+    if (!table) return
     removeTable(table.id)
-  }
+  }, [removeTable, table])
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
+  const handleUpdateColumn = useCallback(
+    (
+      columnId: string,
+      updates: Partial<Pick<Column, 'name' | 'type' | 'constraints'>>
+    ) => {
+      if (!table) return
+      updateColumn(table.id, columnId, updates)
+    },
+    [updateColumn, table]
+  )
 
-    if (over && active.id !== over.id) {
-      const oldIndex = table.columns.findIndex((col) => col.id === active.id)
-      const newIndex = table.columns.findIndex((col) => col.id === over.id)
+  const handleRemoveColumn = useCallback(
+    (columnId: string) => {
+      if (!table) return
+      removeColumn(table.id, columnId)
+    },
+    [removeColumn, table]
+  )
 
-      if (oldIndex !== -1 && newIndex !== -1) {
-        reorderColumns(table.id, oldIndex, newIndex)
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      if (!table) return
+      const { active, over } = event
+
+      if (over && active.id !== over.id) {
+        const oldIndex = table.columns.findIndex((col) => col.id === active.id)
+        const newIndex = table.columns.findIndex((col) => col.id === over.id)
+
+        if (oldIndex !== -1 && newIndex !== -1) {
+          reorderColumns(table.id, oldIndex, newIndex)
+        }
       }
-    }
-  }
+    },
+    [table, reorderColumns]
+  )
+
+  // Early return must come AFTER all hooks
+  if (!table) return null
 
   return (
     <div
@@ -138,7 +172,7 @@ export function TableEditor() {
               onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={table.columns.map((col) => col.id)}
+                items={columnIds}
                 strategy={verticalListSortingStrategy}
               >
                 <div className="divide-border/50 divide-y">
@@ -146,10 +180,8 @@ export function TableEditor() {
                     <ColumnRow
                       key={col.id}
                       column={col}
-                      onUpdate={(columnId, updates) =>
-                        updateColumn(table.id, columnId, updates)
-                      }
-                      onRemove={(columnId) => removeColumn(table.id, columnId)}
+                      onUpdate={handleUpdateColumn}
+                      onRemove={handleRemoveColumn}
                     />
                   ))}
                 </div>
