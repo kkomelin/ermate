@@ -112,9 +112,12 @@ export function LogBar() {
     <div className="bg-card/95 border-t shadow-lg backdrop-blur-sm">
       {/* Tab header row */}
       <div className="flex items-center">
-        <div className="flex flex-1">
+        <div className="flex flex-1" role="tablist">
           <button
             type="button"
+            role="tab"
+            aria-selected={activeTab === 'history'}
+            aria-controls="history-panel"
             className={cn(
               'flex cursor-pointer items-center gap-1.5 border-b-2 px-4 py-1.5 text-xs font-medium',
               activeTab === 'history'
@@ -140,6 +143,9 @@ export function LogBar() {
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={activeTab === 'errors'}
+            aria-controls="errors-panel"
             className={cn(
               'flex cursor-pointer items-center gap-1.5 border-b-2 px-4 py-1.5 text-xs font-medium',
               activeTab === 'errors'
@@ -179,6 +185,8 @@ export function LogBar() {
 
         <button
           type="button"
+          aria-label={expanded ? 'Collapse log panel' : 'Expand log panel'}
+          aria-expanded={expanded}
           className="cursor-pointer px-3 py-1.5"
           onClick={toggle}
         >
@@ -193,8 +201,9 @@ export function LogBar() {
       {/* Expanded content */}
       {expanded && (
         <div className="max-h-40 space-y-1 overflow-y-auto border-t px-4 py-2">
-          {activeTab === 'errors' &&
-            (issues.length === 0 ? (
+          {activeTab === 'errors' && (
+            <div role="tabpanel" id="errors-panel" aria-labelledby="errors-tab">
+              {issues.length === 0 ? (
               <div className="text-muted-foreground flex items-center justify-start gap-1.5 py-2 text-xs">
                 <CircleCheckIcon className="size-3.5 text-emerald-500" />
                 No validation issues
@@ -224,21 +233,30 @@ export function LogBar() {
                   </div>
                 ))}
               </>
-            ))}
+            )}
+            </div>
+          )}
 
-          {activeTab === 'history' &&
-            (historyEntries.length === 0 ? (
-              <div className="text-muted-foreground py-2 text-left text-xs">
-                No changes yet
-              </div>
-            ) : (
-              historyEntries.map((entry, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm">
-                  <HistoryIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
-                  <span className="text-muted-foreground">{entry}</span>
+          {activeTab === 'history' && (
+            <div
+              role="tabpanel"
+              id="history-panel"
+              aria-labelledby="history-tab"
+            >
+              {historyEntries.length === 0 ? (
+                <div className="text-muted-foreground py-2 text-left text-xs">
+                  No changes yet
                 </div>
-              ))
-            ))}
+              ) : (
+                historyEntries.map((entry, i) => (
+                  <div key={i} className="flex items-start gap-2 text-sm">
+                    <HistoryIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+                    <span className="text-muted-foreground">{entry}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -77,6 +77,8 @@ export function ColumnRow({ column, onUpdate, onRemove }: ColumnRowProps) {
       <Input
         value={column.name}
         onChange={(e) => onUpdate(column.id, { name: e.target.value })}
+        aria-label="Column name"
+        autoComplete="off"
         className="focus-visible:border-border focus-visible:bg-background h-7 flex-1 rounded-sm border-transparent bg-transparent px-1.5 font-mono text-xs shadow-none transition-colors"
         placeholder="column_name"
       />
@@ -117,6 +119,8 @@ export function ColumnRow({ column, onUpdate, onRemove }: ColumnRowProps) {
             <button
               key={ct.value}
               type="button"
+              aria-label={ct.value}
+              aria-pressed={active}
               onClick={() => toggleConstraint(ct.value)}
               className={cn(
                 'h-5 rounded-sm border px-1 font-mono text-[9px] leading-none font-semibold transition-all',

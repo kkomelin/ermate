@@ -159,6 +159,7 @@ export function Toolbar() {
                 <Button
                   variant="ghost"
                   size="sm"
+                  aria-label="Menu"
                   className="m-0.5 flex size-8 items-center justify-center p-0"
                 >
                   <MenuIcon
@@ -209,6 +210,7 @@ export function Toolbar() {
           ref={fileInputRef}
           type="file"
           accept=".json"
+          aria-label="Import schema file"
           className="hidden"
           onChange={handleImport}
         />
@@ -220,6 +222,8 @@ export function Toolbar() {
         {editing ? (
           <input
             ref={nameInputRef}
+            aria-label="Schema name"
+            autoComplete="off"
             className="border-primary bg-background text-foreground ring-primary/30 mx-1 w-24 rounded border px-1.5 py-0.5 text-xs font-semibold ring-1 outline-none md:w-32"
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
@@ -280,6 +284,7 @@ export function Toolbar() {
               size="icon-xs"
               onClick={() => undo()}
               disabled={pastStates.length === 0}
+              aria-label="Undo"
             >
               <Undo2Icon className="size-3.5" />
             </Button>
@@ -294,6 +299,7 @@ export function Toolbar() {
               size="icon-xs"
               onClick={() => redo()}
               disabled={futureStates.length === 0}
+              aria-label="Redo"
             >
               <Redo2Icon className="size-3.5" />
             </Button>
@@ -307,6 +313,7 @@ export function Toolbar() {
           <TooltipTrigger asChild>
             <button
               type="button"
+              aria-label="Toggle validation panel"
               className="relative cursor-pointer p-1"
               onClick={() => {
                 const isErrorsActive =

@@ -181,6 +181,7 @@ export function SchemaCanvas() {
           size="icon-xs"
           onClick={toggleTheme}
           title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
           className="text-muted-foreground hover:text-foreground size-5"
         >
           {theme === 'dark' ? (

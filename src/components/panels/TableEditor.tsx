@@ -52,6 +52,7 @@ export function TableEditor() {
         <Button
           variant="ghost"
           size="icon"
+          aria-label="Close table editor"
           className="text-muted-foreground hover:text-foreground size-6"
           onClick={() => selectTable(null)}
         >
@@ -63,10 +64,15 @@ export function TableEditor() {
       <div className="flex-1 overflow-y-auto">
         {/* Table name */}
         <div className="px-3 pt-3 pb-2">
-          <Label className="text-muted-foreground mb-1.5 text-[10px] tracking-wider uppercase">
+          <Label
+            htmlFor="table-name"
+            className="text-muted-foreground mb-1.5 text-[10px] tracking-wider uppercase"
+          >
             Name
           </Label>
           <Input
+            id="table-name"
+            autoComplete="off"
             value={table.name}
             onChange={(e) => updateTable(table.id, { name: e.target.value })}
             className="h-8 font-mono text-sm font-semibold shadow-none"
