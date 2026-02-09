@@ -1,32 +1,18 @@
-import { useCallback, useRef, useState } from 'react'
-import { useReactFlow } from '@xyflow/react'
-import { toast } from 'sonner'
-import {
-  DownloadIcon,
-  FilePlusIcon,
-  FolderOpenIcon,
-  MenuIcon,
-  XIcon,
-  PencilIcon,
-  Redo2Icon,
-  Share2Icon,
-  SquarePlusIcon,
-  TableIcon,
-  Undo2Icon,
-  UploadIcon,
-} from 'lucide-react'
+import { LoadDialog } from '@/components/panels/LoadDialog'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { useLogBarStore } from '@/hooks/useLogBarStore'
 import { useSchemaStore, useTemporalStore } from '@/hooks/useSchemaStore'
 import { useShareUrl } from '@/hooks/useShareUrl'
 import {
@@ -34,8 +20,25 @@ import {
   downloadAsSQL,
   importFromFile,
 } from '@/services/export-import'
-import { LoadDialog } from '@/components/panels/LoadDialog'
 import { ColumnConstraint, ColumnType } from '@/types/schema'
+import { useReactFlow } from '@xyflow/react'
+import {
+  DownloadIcon,
+  FilePlusIcon,
+  FolderOpenIcon,
+  MenuIcon,
+  PencilIcon,
+  Redo2Icon,
+  Share2Icon,
+  ShieldCheckIcon,
+  SquarePlusIcon,
+  TableIcon,
+  Undo2Icon,
+  UploadIcon,
+  XIcon,
+} from 'lucide-react'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 export function Toolbar() {
   const addTable = useSchemaStore((s) => s.addTable)
@@ -51,6 +54,12 @@ export function Toolbar() {
   const futureStates = useTemporalStore((s) => s.futureStates)
   const undo = useTemporalStore((s) => s.undo)
   const redo = useTemporalStore((s) => s.redo)
+  const validate = useSchemaStore((s) => s.validate)
+  const toggleLogBar = useLogBarStore((s) => s.toggle)
+  const errorCount = useMemo(
+    () => validate().filter((i) => i.type === 'error').length,
+    [schema, validate]
+  )
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [loadOpen, setLoadOpen] = useState(false)
@@ -293,6 +302,29 @@ export function Toolbar() {
             </Button>
           </TooltipTrigger>
           <TooltipContent>Redo (Ctrl+Shift+Z)</TooltipContent>
+        </Tooltip>
+
+        <div className="bg-border mx-1 h-5 w-px" />
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className="relative cursor-pointer p-1"
+              onClick={toggleLogBar}
+            >
+              <ShieldCheckIcon className="text-muted-foreground size-4" />
+              {errorCount > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="absolute -top-1.5 -right-1.5 h-4 min-w-4 px-1 text-[10px] tabular-nums"
+                >
+                  {errorCount}
+                </Badge>
+              )}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Toggle validation panel</TooltipContent>
         </Tooltip>
       </div>
 

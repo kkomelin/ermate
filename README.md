@@ -15,8 +15,8 @@ Visual database schema designer for developers. Design ER diagrams, define table
 - **Share via URL** — generate compressed shareable links with the full schema embedded in the URL hash
 - **Auto-save** — changes are automatically saved to localStorage after 1 second of inactivity
 - **Undo/redo** — full undo history for schema changes (Ctrl+Z / Ctrl+Shift+Z)
+- **Validation** — validate schemas for errors and warnings
 - **Dark mode** — toggle between light and dark themes, persisted across sessions
-- **Validation** — detect duplicate table/column names, missing primary keys, and orphaned relationships
 - **PWA** — installable as a standalone app with offline support via service worker
 
 ## Tech Stack

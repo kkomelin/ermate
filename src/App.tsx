@@ -1,14 +1,15 @@
-import { ReactFlowProvider } from '@xyflow/react'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import { Toaster } from '@/components/ui/sonner'
 import { SchemaCanvas } from '@/components/canvas/SchemaCanvas'
 import { Toolbar } from '@/components/canvas/Toolbar'
-import { TableEditor } from '@/components/panels/TableEditor'
+import { LogBar } from '@/components/panels/LogBar'
 import { RelationshipEditor } from '@/components/panels/RelationshipEditor'
+import { TableEditor } from '@/components/panels/TableEditor'
+import { Toaster } from '@/components/ui/sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { useAutoSave } from '@/hooks/useAutoSave'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useShareUrl } from '@/hooks/useShareUrl'
 import { useTheme } from '@/hooks/useTheme'
-import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { ReactFlowProvider } from '@xyflow/react'
 
 function AppInner() {
   useAutoSave()
@@ -16,11 +17,14 @@ function AppInner() {
   useKeyboardShortcuts()
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden">
-      <Toolbar />
-      <SchemaCanvas />
-      <TableEditor />
-      <RelationshipEditor />
+    <div className="flex h-screen w-screen flex-col overflow-hidden">
+      <div className="relative min-h-0 flex-1">
+        <Toolbar />
+        <SchemaCanvas />
+        <TableEditor />
+        <RelationshipEditor />
+      </div>
+      <LogBar />
     </div>
   )
 }
