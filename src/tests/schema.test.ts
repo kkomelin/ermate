@@ -7,6 +7,7 @@ import {
   addColumn,
   updateColumn,
   removeColumn,
+  reorderColumns,
   addRelationship,
   updateRelationship,
   removeRelationship,
@@ -237,6 +238,110 @@ describe('columns', () => {
     expect(s.relationships).toHaveLength(1)
     s = removeColumn(s, t1.id, col1.id)
     expect(s.relationships).toHaveLength(0)
+  })
+
+  it('reorders columns within a table', () => {
+    let s = schemaWithTable()
+    const tableId = s.tables[0].id
+
+    // Add two more columns for a total of 5
+    s = addColumn(s, tableId, {
+      name: 'email',
+      type: ColumnType.VARCHAR,
+      constraints: [],
+    })
+    s = addColumn(s, tableId, {
+      name: 'name',
+      type: ColumnType.VARCHAR,
+      constraints: [],
+    })
+
+    const table = s.tables[0]
+    expect(table.columns).toHaveLength(5)
+    // Original order: id, created_at, updated_at, email, name
+
+    // Move email (index 3) to position 1
+    const updated = reorderColumns(s, tableId, 3, 1)
+    const updatedTable = updated.tables[0]
+
+    expect(updatedTable.columns[0].name).toBe('id')
+    expect(updatedTable.columns[1].name).toBe('email') // Moved here
+    expect(updatedTable.columns[2].name).toBe('created_at')
+    expect(updatedTable.columns[3].name).toBe('updated_at')
+    expect(updatedTable.columns[4].name).toBe('name')
+  })
+
+  it('reorders columns forward (lower to higher index)', () => {
+    let s = schemaWithTable()
+    const tableId = s.tables[0].id
+
+    // Add email and name
+    s = addColumn(s, tableId, {
+      name: 'email',
+      type: ColumnType.VARCHAR,
+      constraints: [],
+    })
+    s = addColumn(s, tableId, {
+      name: 'name',
+      type: ColumnType.VARCHAR,
+      constraints: [],
+    })
+
+    // Original: id, created_at, updated_at, email, name
+    // Move id (index 0) to position 2
+    const updated = reorderColumns(s, tableId, 0, 2)
+    const updatedTable = updated.tables[0]
+
+    expect(updatedTable.columns[0].name).toBe('created_at')
+    expect(updatedTable.columns[1].name).toBe('updated_at')
+    expect(updatedTable.columns[2].name).toBe('id') // Moved here
+    expect(updatedTable.columns[3].name).toBe('email')
+    expect(updatedTable.columns[4].name).toBe('name')
+  })
+
+  it('reorders columns does not affect other tables', () => {
+    let s = schemaWithTable()
+    s = addTable(s, 'posts', { x: 100, y: 0 })
+
+    const table1Id = s.tables[0].id
+    const table2Id = s.tables[1].id
+
+    s = addColumn(s, table1Id, {
+      name: 'email',
+      type: ColumnType.VARCHAR,
+      constraints: [],
+    })
+
+    // Original table1: id, created_at, updated_at, email
+    const updated = reorderColumns(s, table1Id, 3, 1)
+
+    // Table 1 should be reordered
+    expect(updated.tables[0].columns[1].name).toBe('email')
+
+    // Table 2 should remain unchanged
+    expect(updated.tables[1].columns).toHaveLength(3)
+    expect(updated.tables[1].columns[0].name).toBe('id')
+  })
+
+  it('reorders columns preserves column properties', () => {
+    let s = schemaWithTable()
+    const tableId = s.tables[0].id
+
+    s = addColumn(s, tableId, {
+      name: 'email',
+      type: ColumnType.VARCHAR,
+      constraints: [ColumnConstraint.UNIQUE, ColumnConstraint.NOT_NULL],
+    })
+
+    const emailCol = s.tables[0].columns[3]
+    const updated = reorderColumns(s, tableId, 3, 0)
+
+    const movedCol = updated.tables[0].columns[0]
+    expect(movedCol.id).toBe(emailCol.id)
+    expect(movedCol.name).toBe('email')
+    expect(movedCol.type).toBe(ColumnType.VARCHAR)
+    expect(movedCol.constraints).toContain(ColumnConstraint.UNIQUE)
+    expect(movedCol.constraints).toContain(ColumnConstraint.NOT_NULL)
   })
 })
 

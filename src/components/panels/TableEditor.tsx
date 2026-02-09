@@ -8,6 +8,20 @@ import { Separator } from '@/components/ui/separator'
 import { ColumnRow } from './ColumnRow'
 import { ConfirmDelete } from './ConfirmDelete'
 import { cn } from '@/lib/utils'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
 
 export function TableEditor() {
   const schema = useSchemaStore((s) => s.schema)
@@ -16,8 +30,16 @@ export function TableEditor() {
   const addColumn = useSchemaStore((s) => s.addColumn)
   const updateColumn = useSchemaStore((s) => s.updateColumn)
   const removeColumn = useSchemaStore((s) => s.removeColumn)
+  const reorderColumns = useSchemaStore((s) => s.reorderColumns)
   const removeTable = useSchemaStore((s) => s.removeTable)
   const selectTable = useSchemaStore((s) => s.selectTable)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
   const table = selectedTableId
     ? schema.tables.find((t) => t.id === selectedTableId)
@@ -35,6 +57,19 @@ export function TableEditor() {
 
   const handleDeleteTable = () => {
     removeTable(table.id)
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (over && active.id !== over.id) {
+      const oldIndex = table.columns.findIndex((col) => col.id === active.id)
+      const newIndex = table.columns.findIndex((col) => col.id === over.id)
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        reorderColumns(table.id, oldIndex, newIndex)
+      }
+    }
   }
 
   return (
@@ -97,18 +132,29 @@ export function TableEditor() {
               No columns yet
             </div>
           ) : (
-            <div className="divide-border/50 divide-y">
-              {table.columns.map((col) => (
-                <ColumnRow
-                  key={col.id}
-                  column={col}
-                  onUpdate={(columnId, updates) =>
-                    updateColumn(table.id, columnId, updates)
-                  }
-                  onRemove={(columnId) => removeColumn(table.id, columnId)}
-                />
-              ))}
-            </div>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={table.columns.map((col) => col.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="divide-border/50 divide-y">
+                  {table.columns.map((col) => (
+                    <ColumnRow
+                      key={col.id}
+                      column={col}
+                      onUpdate={(columnId, updates) =>
+                        updateColumn(table.id, columnId, updates)
+                      }
+                      onRemove={(columnId) => removeColumn(table.id, columnId)}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           )}
 
           <Button

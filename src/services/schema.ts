@@ -205,6 +205,26 @@ export function removeColumn(
   }
 }
 
+export function reorderColumns(
+  schema: Schema,
+  tableId: string,
+  oldIndex: number,
+  newIndex: number
+): Schema {
+  return {
+    ...schema,
+    tables: schema.tables.map((t) => {
+      if (t.id !== tableId) return t
+
+      const columns = [...t.columns]
+      const [movedColumn] = columns.splice(oldIndex, 1)
+      columns.splice(newIndex, 0, movedColumn)
+
+      return { ...t, columns }
+    }),
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Relationships
 // ---------------------------------------------------------------------------

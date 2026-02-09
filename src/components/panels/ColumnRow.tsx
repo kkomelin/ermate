@@ -1,4 +1,4 @@
-import { Trash2Icon } from 'lucide-react'
+import { GripVerticalIcon, Trash2Icon } from 'lucide-react'
 import type { Column, ColumnConstraint, ColumnType } from '@/types/schema'
 import { ColumnType as CT, ColumnConstraint as CC } from '@/types/schema'
 import { Input } from '@/components/ui/input'
@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/select'
 import { ConfirmDelete } from './ConfirmDelete'
 import { cn } from '@/lib/utils'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 const COLUMN_TYPES: { value: ColumnType; label: string }[] = [
   { value: CT.VARCHAR, label: 'VARCHAR' },
@@ -63,6 +65,20 @@ interface ColumnRowProps {
 }
 
 export function ColumnRow({ column, onUpdate, onRemove }: ColumnRowProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: column.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
   const toggleConstraint = (constraint: ColumnConstraint) => {
     const has = column.constraints.includes(constraint)
     const updated = has
@@ -72,7 +88,25 @@ export function ColumnRow({ column, onUpdate, onRemove }: ColumnRowProps) {
   }
 
   return (
-    <div className="group flex items-center gap-1.5 py-1.5">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        'group flex items-center gap-1.5 py-1.5',
+        isDragging && 'opacity-50'
+      )}
+    >
+      {/* Drag handle */}
+      <button
+        type="button"
+        className="text-muted-foreground/40 hover:text-muted-foreground cursor-grab active:cursor-grabbing shrink-0 touch-none"
+        aria-label="Drag to reorder"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVerticalIcon className="size-4" />
+      </button>
+
       {/* Column name */}
       <Input
         value={column.name}

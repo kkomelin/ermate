@@ -54,6 +54,7 @@ interface SchemaState {
     updates: Partial<Pick<Column, 'name' | 'type' | 'constraints'>>
   ) => void
   removeColumn: (tableId: string, columnId: string) => void
+  reorderColumns: (tableId: string, oldIndex: number, newIndex: number) => void
 
   // Relationships
   addRelationship: (rel: Omit<Relationship, 'id'>) => void
@@ -166,6 +167,15 @@ export const useSchemaStore = create<SchemaState>()(
       removeColumn: (tableId, columnId) =>
         set((s) => ({
           schema: SchemaService.removeColumn(s.schema, tableId, columnId),
+        })),
+      reorderColumns: (tableId, oldIndex, newIndex) =>
+        set((s) => ({
+          schema: SchemaService.reorderColumns(
+            s.schema,
+            tableId,
+            oldIndex,
+            newIndex
+          ),
         })),
 
       // Relationships
