@@ -4,8 +4,6 @@
 
 Visual database schema designer for developers. Design ER diagrams, define tables and relationships, and share via URL — no backend required.
 
-PWA-ready: install it on your device and use it offline.
-
 ## Features
 
 - **Visual canvas** — drag-and-drop tables on an interactive grid with zoom, pan, and fit-to-view
@@ -61,7 +59,3 @@ All data lives in the browser — no server, no database.
 - **Theme preference** is stored under `ermate:theme`
 - **Shared schemas** are encoded in the URL hash (`#schema=...`) using LZ-String compression
 - **PWA cache** is managed by Workbox for offline access
-
-## License
-
-MIT
