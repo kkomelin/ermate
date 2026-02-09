@@ -75,7 +75,7 @@
       "id": "r1",
       "source": { "tableId": "t2", "columnId": "c11" },
       "target": { "tableId": "t1", "columnId": "c1" },
-      "type": "one-to-many"
+      "type": "1:N"
     }
   ]
 }

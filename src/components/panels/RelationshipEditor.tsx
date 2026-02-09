@@ -25,11 +25,11 @@ import { ConfirmDelete } from './ConfirmDelete'
 
 const REL_TYPE_OPTIONS: { value: RelType; label: string; badge: string }[] = [
   { value: RelationshipType.ONE_TO_ONE, label: 'One-to-One', badge: '1:1' },
-  { value: RelationshipType.ONE_TO_MANY, label: 'One-to-Many', badge: '1:M' },
+  { value: RelationshipType.ONE_TO_MANY, label: 'One-to-Many', badge: '1:N' },
   {
     value: RelationshipType.MANY_TO_MANY,
     label: 'Many-to-Many',
-    badge: 'M:M',
+    badge: 'N:M',
   },
 ]
 

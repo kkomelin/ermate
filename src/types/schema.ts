@@ -16,9 +16,9 @@ export type ColumnConstraint =
   (typeof ColumnConstraint)[keyof typeof ColumnConstraint]
 
 export const RelationshipType = {
-  ONE_TO_ONE: 'one-to-one',
-  ONE_TO_MANY: 'one-to-many',
-  MANY_TO_MANY: 'many-to-many',
+  ONE_TO_ONE: '1:1',
+  ONE_TO_MANY: '1:N',
+  MANY_TO_MANY: 'N:M',
 } as const
 export type RelationshipType =
   (typeof RelationshipType)[keyof typeof RelationshipType]
