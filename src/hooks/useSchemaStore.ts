@@ -209,6 +209,19 @@ export const useSchemaStore = create<SchemaState>()(
     }),
     {
       partialize: (state) => ({ schema: state.schema }) as PartializedState,
+      equality: (pastState, currentState) => {
+        const past = pastState.schema;
+        const curr = currentState.schema;
+        // Compare everything except table positions
+        if (past.tables.length !== curr.tables.length) return false;
+        if (past.relationships !== curr.relationships) return false;
+        for (let i = 0; i < past.tables.length; i++) {
+          const pt = past.tables[i];
+          const ct = curr.tables[i];
+          if (pt.id !== ct.id || pt.name !== ct.name || pt.columns !== ct.columns) return false;
+        }
+        return true;
+      },
     },
   ),
 );

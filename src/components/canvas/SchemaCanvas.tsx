@@ -40,7 +40,7 @@ export function SchemaCanvas() {
     let timer: ReturnType<typeof setTimeout>;
     const handleResize = () => {
       clearTimeout(timer);
-      timer = setTimeout(() => fitView({ padding: 0.1 }), 200);
+      timer = setTimeout(() => fitView({ padding: 0.1, maxZoom: 1 }), 200);
     };
     window.addEventListener("resize", handleResize);
     return () => {
@@ -163,6 +163,7 @@ export function SchemaCanvas() {
       onEdgeClick={onEdgeClick}
       onPaneClick={onPaneClick}
       fitView
+      fitViewOptions={{ maxZoom: 1 }}
       snapToGrid
       snapGrid={[16, 16]}
       minZoom={0.25}
