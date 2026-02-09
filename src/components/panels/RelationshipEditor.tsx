@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { ArrowRightIcon, Trash2Icon } from 'lucide-react'
 import { useSchemaStore } from '@/hooks/useSchemaStore'
-import { RelationshipType, ColumnConstraint } from '@/types/schema'
+import { RelationshipType } from '@/types/schema'
 import type { RelationshipType as RelType } from '@/types/schema'
 import {
   Dialog,
