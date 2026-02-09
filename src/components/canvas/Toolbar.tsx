@@ -2,9 +2,11 @@ import { useCallback, useRef, useState } from "react";
 import { useReactFlow } from "@xyflow/react";
 import { toast } from "sonner";
 import {
-  ChevronDownIcon,
   DownloadIcon,
+  FilePlusIcon,
   FolderOpenIcon,
+  MenuIcon,
+  XIcon,
   PencilIcon,
   Redo2Icon,
   Share2Icon,
@@ -38,6 +40,7 @@ export function Toolbar() {
   const schemaName = useSchemaStore((s) => s.schemaName);
   const setSchemaName = useSchemaStore((s) => s.setSchemaName);
   const setSchema = useSchemaStore((s) => s.setSchema);
+  const newSchema = useSchemaStore((s) => s.newSchema);
   const { getViewport } = useReactFlow();
   const { copyShareUrl } = useShareUrl();
   const pastStates = useTemporalStore((s) => s.pastStates);
@@ -45,6 +48,7 @@ export function Toolbar() {
   const undo = useTemporalStore((s) => s.undo);
   const redo = useTemporalStore((s) => s.redo);
 
+  const [menuOpen, setMenuOpen] = useState(false);
   const [loadOpen, setLoadOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState("");
@@ -136,12 +140,64 @@ export function Toolbar() {
 
   return (
     <>
-      <div className="absolute top-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 rounded-lg border border-border bg-card/95 px-2 py-1.5 shadow-lg backdrop-blur-sm">
+      {/* Top-left hamburger menu */}
+      <div className="absolute top-4 left-4 z-10 rounded-lg border border-border bg-card/95 shadow-lg backdrop-blur-sm">
+        <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="m-0.5 flex size-8 items-center justify-center p-0">
+                  <MenuIcon className={`absolute size-5 transition-all duration-200 ${menuOpen ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"}`} />
+                  <XIcon className={`absolute size-5 transition-all duration-200 ${menuOpen ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"}`} />
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent>Menu</TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => { newSchema(); toast.success("New schema created"); }}>
+              <FilePlusIcon className="size-3.5" />
+              New
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setLoadOpen(true)}>
+              <FolderOpenIcon className="size-3.5" />
+              Load
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportJSON}>
+              <DownloadIcon className="size-3.5" />
+              Export JSON
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportSQL}>
+              <DownloadIcon className="size-3.5" />
+              Export SQL
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+              <UploadIcon className="size-3.5" />
+              Import
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleShare}>
+              <Share2Icon className="size-3.5" />
+              Share
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          className="hidden"
+          onChange={handleImport}
+        />
+      </div>
+
+      {/* Toolbar — schema name + actions */}
+      <div className="absolute top-4 right-4 z-10 flex items-center gap-1 rounded-lg border border-border bg-card/95 px-2 py-1.5 shadow-lg backdrop-blur-sm">
         {/* Schema name (inline editable) */}
         {editing ? (
           <input
             ref={nameInputRef}
-            className="mx-1 w-32 rounded border border-primary bg-background px-1.5 py-0.5 text-xs font-semibold text-foreground outline-none ring-1 ring-primary/30"
+            className="mx-1 w-24 rounded border border-primary bg-background px-1.5 py-0.5 text-xs font-semibold text-foreground outline-none ring-1 ring-primary/30 md:w-32"
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={commitName}
@@ -156,7 +212,7 @@ export function Toolbar() {
               <Button
                 variant="ghost"
                 size="xs"
-                className="group mx-1 max-w-40 gap-1.5 border border-dashed border-transparent font-semibold hover:border-border"
+                className="group mx-1 max-w-20 gap-1.5 border border-dashed border-transparent font-semibold hover:border-border md:max-w-40"
                 onClick={startEditing}
               >
                 <span className="truncate">{schemaName}</span>
@@ -168,26 +224,12 @@ export function Toolbar() {
         )}
 
         <div className="mx-1 h-5 w-px bg-border" />
-
-        {/* Load */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="xs" onClick={() => setLoadOpen(true)}>
-              <FolderOpenIcon className="size-3.5" />
-              <span>Load</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Load a saved schema</TooltipContent>
-        </Tooltip>
-
-        <div className="mx-1 h-5 w-px bg-border" />
-
-        {/* Add Table / Sample / Undo / Redo */}
+        {/* Add Table / Sample */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="xs" onClick={handleAddTable}>
               <SquarePlusIcon className="size-3.5" />
-              <span>Add Table</span>
+              <span className="hidden md:inline">Add Table</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>Add an empty table to the canvas</TooltipContent>
@@ -197,12 +239,15 @@ export function Toolbar() {
           <TooltipTrigger asChild>
             <Button variant="ghost" size="xs" onClick={handleAddSampleTable}>
               <TableIcon className="size-3.5" />
-              <span>Sample</span>
+              <span className="hidden md:inline">Sample</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>Add a sample "users" table with columns</TooltipContent>
         </Tooltip>
 
+        <div className="mx-1 h-5 w-px bg-border" />
+
+        {/* Undo / Redo */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -230,64 +275,6 @@ export function Toolbar() {
           </TooltipTrigger>
           <TooltipContent>Redo (Ctrl+Shift+Z)</TooltipContent>
         </Tooltip>
-
-        <div className="mx-1 h-5 w-px bg-border" />
-
-        {/* Export / Import */}
-        <DropdownMenu>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="xs">
-                  <DownloadIcon className="size-3.5" />
-                  <span>Export</span>
-                  <ChevronDownIcon className="size-2.5 ml-0.5 opacity-60" />
-                </Button>
-              </DropdownMenuTrigger>
-            </TooltipTrigger>
-            <TooltipContent>Export schema as JSON or SQL</TooltipContent>
-          </Tooltip>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleExportJSON}>
-              Export JSON
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleExportSQL}>
-              Export SQL
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="xs" onClick={() => fileInputRef.current?.click()}>
-              <UploadIcon className="size-3.5" />
-              <span>Import</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Import schema from JSON file</TooltipContent>
-        </Tooltip>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".json"
-          className="hidden"
-          onChange={handleImport}
-        />
-
-        <div className="mx-1 h-5 w-px bg-border" />
-
-        {/* Share */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="xs" onClick={handleShare}>
-              <Share2Icon className="size-3.5" />
-              <span>Share</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Copy shareable URL to clipboard</TooltipContent>
-        </Tooltip>
-
       </div>
 
       <LoadDialog open={loadOpen} onOpenChange={setLoadOpen} />
