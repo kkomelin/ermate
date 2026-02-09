@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "tables": [
+    {
+      "id": "t1",
+      "name": "users",
+      "position": { "x": 0, "y": 0 },
+      "columns": [
+        {
+          "id": "c1",
+          "name": "id",
+          "type": "INTEGER",
+          "constraints": ["PRIMARY KEY", "NOT NULL"]
+        },
+        {
+          "id": "c2",
+          "name": "email",
+          "type": "VARCHAR",
+          "constraints": ["NOT NULL", "UNIQUE"]
+        },
+        {
+          "id": "c3",
+          "name": "name",
+          "type": "VARCHAR",
+          "constraints": []
+        },
+        {
+          "id": "c4",
+          "name": "active",
+          "type": "BOOLEAN",
+          "constraints": ["NOT NULL"]
+        },
+        {
+          "id": "c5",
+          "name": "bio",
+          "type": "TEXT",
+          "constraints": []
+        },
+        {
+          "id": "c6",
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "constraints": ["NOT NULL"]
+        }
+      ]
+    },
+    {
+      "id": "t2",
+      "name": "posts",
+      "position": { "x": 200, "y": 0 },
+      "columns": [
+        {
+          "id": "c10",
+          "name": "id",
+          "type": "INTEGER",
+          "constraints": ["PRIMARY KEY"]
+        },
+        {
+          "id": "c11",
+          "name": "user_id",
+          "type": "INTEGER",
+          "constraints": ["NOT NULL"]
+        },
+        {
+          "id": "c12",
+          "name": "title",
+          "type": "TEXT",
+          "constraints": ["NOT NULL"]
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "r1",
+      "source": { "tableId": "t2", "columnId": "c11" },
+      "target": { "tableId": "t1", "columnId": "c1" },
+      "type": "one-to-many"
+    }
+  ]
+}
