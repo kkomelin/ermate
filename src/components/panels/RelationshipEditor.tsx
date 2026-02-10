@@ -40,12 +40,12 @@ function EndpointLabel({
   columnName: string
 }) {
   return (
-    <div className="border-border/60 bg-muted/40 flex min-w-0 flex-1 items-baseline gap-1 rounded-md border px-2.5 py-1.5">
-      <span className="text-card-foreground truncate text-xs font-semibold">
+    <div className="border-border/60 bg-muted/40 w-full min-w-0 break-all rounded-md border px-2.5 py-1.5">
+      <span className="text-card-foreground text-xs font-semibold">
         {tableName}
       </span>
       <span className="text-muted-foreground text-[10px]">.</span>
-      <span className="text-muted-foreground truncate text-[11px]">
+      <span className="text-muted-foreground text-[11px]">
         {columnName}
       </span>
     </div>
@@ -202,9 +202,9 @@ export function RelationshipEditor() {
           <Label className="text-muted-foreground text-[10px] tracking-wider uppercase">
             Connection
           </Label>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col items-center gap-1.5">
             <EndpointLabel {...endpoints.source} />
-            <ArrowRightIcon className="text-muted-foreground/60 size-3.5 shrink-0" />
+            <ArrowRightIcon className="text-muted-foreground/60 size-3.5 rotate-90" />
             <EndpointLabel {...endpoints.target} />
           </div>
         </div>
