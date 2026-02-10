@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { ArrowRightIcon, Trash2Icon } from 'lucide-react'
 import { useSchemaStore } from '@/hooks/useSchemaStore'
-import { RelationshipType } from '@/types/schema'
+import { ColumnConstraint, RelationshipType } from '@/types/schema'
 import type { RelationshipType as RelType } from '@/types/schema'
 import {
   Dialog,
@@ -21,7 +21,6 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { ConfirmDelete } from './ConfirmDelete'
 
 const REL_TYPE_OPTIONS: { value: RelType; label: string; badge: string }[] = [
   { value: RelationshipType.ONE_TO_ONE, label: 'One-to-One', badge: '1:1' },
@@ -62,6 +61,7 @@ export function RelationshipEditor() {
   const addRelationship = useSchemaStore((s) => s.addRelationship)
   const updateRelationship = useSchemaStore((s) => s.updateRelationship)
   const removeRelationship = useSchemaStore((s) => s.removeRelationship)
+  const updateColumn = useSchemaStore((s) => s.updateColumn)
   const generateJunctionTable = useSchemaStore((s) => s.generateJunctionTable)
 
   const existingRel = selectedRelationshipId
@@ -74,17 +74,65 @@ export function RelationshipEditor() {
 
   const [relType, setRelType] = useState<RelType>(RelationshipType.ONE_TO_MANY)
   const [genJunction, setGenJunction] = useState(false)
+  const [addFk, setAddFk] = useState(false)
+
+  // Detect which endpoint column could receive a FK constraint
+  const fkTarget = useMemo(() => {
+    const source = isEdit ? existingRel.source : pendingConnection?.source
+    const target = isEdit ? existingRel.target : pendingConnection?.target
+    if (!source || !target) return null
+
+    const sourceTable = schema.tables.find((t) => t.id === source.tableId)
+    const targetTable = schema.tables.find((t) => t.id === target.tableId)
+    const sourceCol = sourceTable?.columns.find((c) => c.id === source.columnId)
+    const targetCol = targetTable?.columns.find((c) => c.id === target.columnId)
+    if (!sourceCol || !targetCol) return null
+
+    const sourceIsPk = sourceCol.constraints.includes(
+      ColumnConstraint.PRIMARY_KEY
+    )
+    const targetIsPk = targetCol.constraints.includes(
+      ColumnConstraint.PRIMARY_KEY
+    )
+
+    // If one side is PK and the other is not already FK, suggest marking it as FK
+    if (
+      sourceIsPk &&
+      !targetCol.constraints.includes(ColumnConstraint.FOREIGN_KEY)
+    ) {
+      return {
+        tableId: target.tableId,
+        columnId: target.columnId,
+        tableName: targetTable!.name,
+        columnName: targetCol.name,
+      }
+    }
+    if (
+      targetIsPk &&
+      !sourceCol.constraints.includes(ColumnConstraint.FOREIGN_KEY)
+    ) {
+      return {
+        tableId: source.tableId,
+        columnId: source.columnId,
+        tableName: sourceTable!.name,
+        columnName: sourceCol.name,
+      }
+    }
+    return null
+  }, [schema.tables, existingRel, pendingConnection, isEdit])
 
   // Sync state when dialog opens
   useEffect(() => {
     if (existingRel) {
       setRelType(existingRel.type)
       setGenJunction(false)
+      setAddFk(false)
     } else if (pendingConnection) {
       setRelType(RelationshipType.ONE_TO_MANY)
       setGenJunction(false)
+      setAddFk(!!fkTarget)
     }
-  }, [existingRel, pendingConnection])
+  }, [existingRel, pendingConnection, fkTarget])
 
   // Resolve endpoint names
   const endpoints = useMemo(() => {
@@ -114,6 +162,18 @@ export function RelationshipEditor() {
     if (isEdit) selectRelationship(null)
   }
 
+  const applyFk = () => {
+    if (addFk && fkTarget) {
+      const table = schema.tables.find((t) => t.id === fkTarget.tableId)
+      const col = table?.columns.find((c) => c.id === fkTarget.columnId)
+      if (col && !col.constraints.includes(ColumnConstraint.FOREIGN_KEY)) {
+        updateColumn(fkTarget.tableId, fkTarget.columnId, {
+          constraints: [...col.constraints, ColumnConstraint.FOREIGN_KEY],
+        })
+      }
+    }
+  }
+
   const handleSave = () => {
     if (isCreate && pendingConnection) {
       addRelationship({
@@ -127,6 +187,7 @@ export function RelationshipEditor() {
           pendingConnection.target.tableId
         )
       }
+      applyFk()
       setPendingConnection(null)
     } else if (isEdit && existingRel) {
       updateRelationship(existingRel.id, { type: relType })
@@ -140,6 +201,7 @@ export function RelationshipEditor() {
           existingRel.target.tableId
         )
       }
+      applyFk()
       selectRelationship(null)
     }
   }
@@ -229,36 +291,38 @@ export function RelationshipEditor() {
           </div>
         )}
 
+        {/* Auto-add FK constraint */}
+        {fkTarget && (
+          <div className="border-border/60 bg-muted/30 flex items-center gap-2 rounded-md border border-dashed px-3 py-2.5">
+            <Checkbox
+              id="add-fk"
+              checked={addFk}
+              onCheckedChange={(v) => setAddFk(v === true)}
+            />
+            <Label
+              htmlFor="add-fk"
+              className="text-muted-foreground cursor-pointer text-xs leading-tight"
+            >
+              Add FOREIGN KEY to{' '}
+              <span className="text-card-foreground font-semibold">
+                {fkTarget.tableName}.{fkTarget.columnName}
+              </span>
+            </Label>
+          </div>
+        )}
+
         {/* Footer */}
         <DialogFooter className="gap-2 sm:gap-2">
           {isEdit && (
-            <ConfirmDelete
-              trigger={
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive mr-auto gap-1.5"
-                >
-                  <Trash2Icon className="size-3" />
-                  Delete
-                </Button>
-              }
-              title="Delete relationship?"
-              description={
-                <>
-                  The relationship between{' '}
-                  <strong className="font-mono">
-                    {endpoints.source.tableName}
-                  </strong>{' '}
-                  and{' '}
-                  <strong className="font-mono">
-                    {endpoints.target.tableName}
-                  </strong>{' '}
-                  will be permanently removed.
-                </>
-              }
-              onConfirm={handleDelete}
-            />
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive mr-auto gap-1.5"
+              onClick={handleDelete}
+            >
+              <Trash2Icon className="size-3" />
+              Delete
+            </Button>
           )}
           <Button variant="outline" size="sm" onClick={handleClose}>
             Cancel

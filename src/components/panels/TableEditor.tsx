@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { ColumnRow } from './ColumnRow'
-import { ConfirmDelete } from './ConfirmDelete'
 import { cn } from '@/lib/utils'
 import {
   DndContext,
@@ -91,9 +90,9 @@ export function TableEditor() {
 
   const handleAddColumn = useCallback(() => {
     if (!selectedTableId) return
-    const t = useSchemaStore.getState().schema.tables.find(
-      (t) => t.id === selectedTableId
-    )
+    const t = useSchemaStore
+      .getState()
+      .schema.tables.find((t) => t.id === selectedTableId)
     if (!t) return
     addColumn(selectedTableId, {
       name: `column_${t.columns.length + 1}`,
@@ -132,9 +131,9 @@ export function TableEditor() {
       const { active, over } = event
 
       if (over && active.id !== over.id) {
-        const cols = useSchemaStore.getState().schema.tables.find(
-          (t) => t.id === selectedTableId
-        )?.columns
+        const cols = useSchemaStore
+          .getState()
+          .schema.tables.find((t) => t.id === selectedTableId)?.columns
         if (!cols) return
         const oldIndex = cols.findIndex((col) => col.id === active.id)
         const newIndex = cols.findIndex((col) => col.id === over.id)
@@ -233,27 +232,15 @@ export function TableEditor() {
 
       {/* Footer — delete table */}
       <div className="border-t p-3">
-        <ConfirmDelete
-          trigger={
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive w-full gap-1.5"
-            >
-              <Trash2Icon className="size-3" />
-              Delete Table
-            </Button>
-          }
-          title="Delete table?"
-          description={
-            <>
-              Table <strong className="font-mono">{table.name}</strong> and all
-              its columns will be permanently removed. Any relationships
-              involving this table will also be deleted.
-            </>
-          }
-          onConfirm={handleDeleteTable}
-        />
+        <Button
+          variant="outline"
+          size="sm"
+          className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive w-full gap-1.5"
+          onClick={handleDeleteTable}
+        >
+          <Trash2Icon className="size-3" />
+          Delete Table
+        </Button>
       </div>
     </div>
   )

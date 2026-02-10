@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ConfirmDelete } from './ConfirmDelete'
 import { cn } from '@/lib/utils'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -148,7 +147,11 @@ function ColumnRowComponent({ column, onUpdate, onRemove }: ColumnRowProps) {
       </button>
 
       {/* Column name */}
-      <ColumnNameInput columnId={column.id} name={column.name} onUpdate={onUpdate} />
+      <ColumnNameInput
+        columnId={column.id}
+        name={column.name}
+        onUpdate={onUpdate}
+      />
 
       {/* Type selector */}
       <Select
@@ -203,26 +206,14 @@ function ColumnRowComponent({ column, onUpdate, onRemove }: ColumnRowProps) {
       </div>
 
       {/* Delete */}
-      <ConfirmDelete
-        trigger={
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-muted-foreground/40 hover:text-destructive size-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
-          >
-            <Trash2Icon className="size-3" />
-          </Button>
-        }
-        title="Delete column?"
-        description={
-          <>
-            Column <strong className="font-mono">{column.name}</strong> will be
-            permanently removed. Any relationships using this column will also
-            be deleted.
-          </>
-        }
-        onConfirm={() => onRemove(column.id)}
-      />
+      <Button
+        variant="ghost"
+        size="icon"
+        className="text-muted-foreground/40 hover:text-destructive size-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+        onClick={() => onRemove(column.id)}
+      >
+        <Trash2Icon className="size-3" />
+      </Button>
     </div>
   )
 }

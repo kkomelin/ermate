@@ -18,7 +18,6 @@ import { useSchemaStore } from '@/hooks/useSchemaStore'
 import { useTheme } from '@/hooks/useTheme'
 import { TableNode, type TableNodeData } from './TableNode'
 import { RelationshipType } from '@/types/schema'
-import { ConfirmDelete } from '@/components/panels/ConfirmDelete'
 
 const nodeTypes: NodeTypes = {
   table: TableNode,
@@ -35,13 +34,6 @@ export function SchemaCanvas() {
   const setPendingConnection = useSchemaStore((s) => s.setPendingConnection)
   const removeTable = useSchemaStore((s) => s.removeTable)
   const removeRelationship = useSchemaStore((s) => s.removeRelationship)
-
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [deleteTarget, setDeleteTarget] = useState<{
-    type: 'table' | 'relationship'
-    id: string
-    name: string
-  } | null>(null)
 
   const { fitView } = useReactFlow()
 
@@ -71,24 +63,13 @@ export function SchemaCanvas() {
 
       if (e.key === 'Delete') {
         e.preventDefault()
-        const { schema: s, selectedTableId: tableId, selectedRelationshipId: relId } =
+        const { selectedTableId: tableId, selectedRelationshipId: relId } =
           useSchemaStore.getState()
 
         if (tableId) {
-          const table = s.tables.find((t) => t.id === tableId)
-          if (table) {
-            setDeleteTarget({ type: 'table', id: table.id, name: table.name })
-            setShowDeleteConfirm(true)
-          }
+          removeTable(tableId)
         } else if (relId) {
-          const rel = s.relationships.find((r) => r.id === relId)
-          if (rel) {
-            const sourceTable = s.tables.find((t) => t.id === rel.source.tableId)
-            const targetTable = s.tables.find((t) => t.id === rel.target.tableId)
-            const name = `${sourceTable?.name ?? '?'} → ${targetTable?.name ?? '?'}`
-            setDeleteTarget({ type: 'relationship', id: rel.id, name })
-            setShowDeleteConfirm(true)
-          }
+          removeRelationship(relId)
         }
       }
     }
@@ -197,7 +178,6 @@ export function SchemaCanvas() {
           updateTable(change.id, { position: change.position })
         }
       }
-
     },
     [updateTable]
   )
@@ -287,36 +267,6 @@ export function SchemaCanvas() {
           )}
         </Button>
       </div>
-
-      {/* Delete confirmation dialog */}
-      <ConfirmDelete
-        open={showDeleteConfirm}
-        onOpenChange={setShowDeleteConfirm}
-        title={`Delete ${deleteTarget?.type === 'table' ? 'table' : 'relationship'}?`}
-        description={
-          deleteTarget?.type === 'table' ? (
-            <>
-              Table <strong className="font-mono">{deleteTarget.name}</strong>{' '}
-              and all its columns will be permanently removed. Any relationships
-              involving this table will also be deleted.
-            </>
-          ) : (
-            <>
-              The relationship{' '}
-              <strong className="font-mono">{deleteTarget?.name}</strong> will
-              be permanently removed.
-            </>
-          )
-        }
-        onConfirm={() => {
-          if (deleteTarget?.type === 'table') {
-            removeTable(deleteTarget.id)
-          } else if (deleteTarget?.type === 'relationship') {
-            removeRelationship(deleteTarget.id)
-          }
-          setDeleteTarget(null)
-        }}
-      />
     </ReactFlow>
   )
 }
