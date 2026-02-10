@@ -198,14 +198,8 @@ export function SchemaCanvas() {
         }
       }
 
-      // Handle selection changes
-      for (const change of changes) {
-        if (change.type === 'select' && change.selected) {
-          selectTable(change.id)
-        }
-      }
     },
-    [updateTable, selectTable]
+    [updateTable]
   )
 
   const onConnect: OnConnect = useCallback(
