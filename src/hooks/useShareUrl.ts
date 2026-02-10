@@ -6,14 +6,18 @@ import { useSchemaStore } from '@/hooks/useSchemaStore'
 export function useShareUrl() {
   const setSchema = useSchemaStore((s) => s.setSchema)
 
-  // On mount, check URL for shared schema
   useEffect(() => {
-    const schema = SharingService.getSchemaFromUrl()
-    if (schema) {
-      setSchema(schema)
-      // Clear the hash so it doesn't re-trigger on future navigations
-      window.history.replaceState(null, '', window.location.pathname)
+    const loadFromHash = () => {
+      const schema = SharingService.getSchemaFromUrl()
+      if (schema) {
+        setSchema(schema)
+        window.history.replaceState(null, '', window.location.pathname)
+      }
     }
+
+    loadFromHash()
+    window.addEventListener('hashchange', loadFromHash)
+    return () => window.removeEventListener('hashchange', loadFromHash)
   }, [setSchema])
 
   return {
