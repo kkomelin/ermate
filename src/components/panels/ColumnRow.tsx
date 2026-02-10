@@ -193,7 +193,7 @@ function ColumnRowComponent({ column, onUpdate, onRemove }: ColumnRowProps) {
               aria-pressed={active}
               onClick={() => toggleConstraint(ct.value)}
               className={cn(
-                'h-5 rounded-sm border px-1 font-mono text-[9px] leading-none font-semibold transition-all',
+                'h-5 rounded-sm border px-1 font-mono text-[9px] leading-none font-semibold transition-colors',
                 active
                   ? ct.activeClass
                   : 'text-muted-foreground/40 hover:border-border hover:text-muted-foreground border-transparent'
@@ -209,6 +209,7 @@ function ColumnRowComponent({ column, onUpdate, onRemove }: ColumnRowProps) {
       <Button
         variant="ghost"
         size="icon"
+        aria-label="Delete column"
         className="text-muted-foreground/40 hover:text-destructive size-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
         onClick={() => onRemove(column.id)}
       >

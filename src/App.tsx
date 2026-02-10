@@ -17,7 +17,7 @@ function AppInner() {
   useKeyboardShortcuts()
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden">
+    <div className="flex h-screen w-screen flex-col overflow-hidden pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       <div className="relative min-h-0 flex-1">
         <Toolbar />
         <SchemaCanvas />

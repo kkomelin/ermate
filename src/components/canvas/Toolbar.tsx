@@ -44,7 +44,6 @@ import { toast } from 'sonner'
 export function Toolbar() {
   const addTable = useSchemaStore((s) => s.addTable)
   const addTableWithColumns = useSchemaStore((s) => s.addTableWithColumns)
-  const schema = useSchemaStore((s) => s.schema)
   const schemaName = useSchemaStore((s) => s.schemaName)
   const setSchemaName = useSchemaStore((s) => s.setSchemaName)
   const setSchema = useSchemaStore((s) => s.setSchema)
@@ -125,12 +124,14 @@ export function Toolbar() {
   }
 
   function handleExportJSON() {
-    const filename = schemaName ? `${schemaName}.json` : undefined
+    const { schema, schemaName: name } = useSchemaStore.getState()
+    const filename = name ? `${name}.json` : undefined
     downloadAsJSON(schema, filename)
   }
 
   function handleExportSQL() {
-    const filename = schemaName ? `${schemaName}.sql` : undefined
+    const { schema, schemaName: name } = useSchemaStore.getState()
+    const filename = name ? `${name}.sql` : undefined
     downloadAsSQL(schema, filename)
   }
 
@@ -163,10 +164,10 @@ export function Toolbar() {
                   className="m-0.5 flex size-8 items-center justify-center p-0"
                 >
                   <MenuIcon
-                    className={`absolute size-5 transition-all duration-200 ${menuOpen ? 'scale-0 rotate-90 opacity-0' : 'scale-100 rotate-0 opacity-100'}`}
+                    className={`absolute size-5 transition-[transform,opacity] duration-200 ${menuOpen ? 'scale-0 rotate-90 opacity-0' : 'scale-100 rotate-0 opacity-100'}`}
                   />
                   <XIcon
-                    className={`absolute size-5 transition-all duration-200 ${menuOpen ? 'scale-100 rotate-0 opacity-100' : 'scale-0 -rotate-90 opacity-0'}`}
+                    className={`absolute size-5 transition-[transform,opacity] duration-200 ${menuOpen ? 'scale-100 rotate-0 opacity-100' : 'scale-0 -rotate-90 opacity-0'}`}
                   />
                 </Button>
               </DropdownMenuTrigger>
@@ -222,6 +223,7 @@ export function Toolbar() {
         {editing ? (
           <input
             ref={nameInputRef}
+            name="schema-name"
             aria-label="Schema name"
             autoComplete="off"
             className="border-primary bg-background text-foreground ring-primary/30 mx-1 w-24 rounded border px-1.5 py-0.5 text-xs font-semibold ring-1 outline-none md:w-32"

@@ -76,49 +76,41 @@ export function RelationshipEditor() {
   const [genJunction, setGenJunction] = useState(false)
   const [addFk, setAddFk] = useState(false)
 
-  // Detect which endpoint column could receive a FK constraint
-  const fkTarget = useMemo(() => {
+  // Resolve endpoints and detect FK target in a single memo
+  const { endpoints, fkTarget } = useMemo(() => {
     const source = isEdit ? existingRel.source : pendingConnection?.source
     const target = isEdit ? existingRel.target : pendingConnection?.target
-    if (!source || !target) return null
+    if (!source || !target) return { endpoints: null, fkTarget: null }
 
     const sourceTable = schema.tables.find((t) => t.id === source.tableId)
     const targetTable = schema.tables.find((t) => t.id === target.tableId)
     const sourceCol = sourceTable?.columns.find((c) => c.id === source.columnId)
     const targetCol = targetTable?.columns.find((c) => c.id === target.columnId)
-    if (!sourceCol || !targetCol) return null
 
-    const sourceIsPk = sourceCol.constraints.includes(
-      ColumnConstraint.PRIMARY_KEY
-    )
-    const targetIsPk = targetCol.constraints.includes(
-      ColumnConstraint.PRIMARY_KEY
-    )
+    const endpointData = {
+      source: {
+        tableName: sourceTable?.name ?? '—',
+        columnName: sourceCol?.name ?? '—',
+      },
+      target: {
+        tableName: targetTable?.name ?? '—',
+        columnName: targetCol?.name ?? '—',
+      },
+    }
 
-    // If one side is PK and the other is not already FK, suggest marking it as FK
-    if (
-      sourceIsPk &&
-      !targetCol.constraints.includes(ColumnConstraint.FOREIGN_KEY)
-    ) {
-      return {
-        tableId: target.tableId,
-        columnId: target.columnId,
-        tableName: targetTable!.name,
-        columnName: targetCol.name,
-      }
+    if (!sourceCol || !targetCol) return { endpoints: endpointData, fkTarget: null }
+
+    const sourceIsPk = sourceCol.constraints.includes(ColumnConstraint.PRIMARY_KEY)
+    const targetIsPk = targetCol.constraints.includes(ColumnConstraint.PRIMARY_KEY)
+
+    let fk: { tableId: string; columnId: string; tableName: string; columnName: string } | null = null
+    if (sourceIsPk && !targetCol.constraints.includes(ColumnConstraint.FOREIGN_KEY)) {
+      fk = { tableId: target.tableId, columnId: target.columnId, tableName: targetTable!.name, columnName: targetCol.name }
+    } else if (targetIsPk && !sourceCol.constraints.includes(ColumnConstraint.FOREIGN_KEY)) {
+      fk = { tableId: source.tableId, columnId: source.columnId, tableName: sourceTable!.name, columnName: sourceCol.name }
     }
-    if (
-      targetIsPk &&
-      !sourceCol.constraints.includes(ColumnConstraint.FOREIGN_KEY)
-    ) {
-      return {
-        tableId: source.tableId,
-        columnId: source.columnId,
-        tableName: sourceTable!.name,
-        columnName: sourceCol.name,
-      }
-    }
-    return null
+
+    return { endpoints: endpointData, fkTarget: fk }
   }, [schema.tables, existingRel, pendingConnection, isEdit])
 
   // Sync state when dialog opens
@@ -133,29 +125,6 @@ export function RelationshipEditor() {
       setAddFk(!!fkTarget)
     }
   }, [existingRel, pendingConnection, fkTarget])
-
-  // Resolve endpoint names
-  const endpoints = useMemo(() => {
-    const source = isEdit ? existingRel.source : pendingConnection?.source
-    const target = isEdit ? existingRel.target : pendingConnection?.target
-    if (!source || !target) return null
-
-    const sourceTable = schema.tables.find((t) => t.id === source.tableId)
-    const targetTable = schema.tables.find((t) => t.id === target.tableId)
-    const sourceCol = sourceTable?.columns.find((c) => c.id === source.columnId)
-    const targetCol = targetTable?.columns.find((c) => c.id === target.columnId)
-
-    return {
-      source: {
-        tableName: sourceTable?.name ?? '—',
-        columnName: sourceCol?.name ?? '—',
-      },
-      target: {
-        tableName: targetTable?.name ?? '—',
-        columnName: targetCol?.name ?? '—',
-      },
-    }
-  }, [schema.tables, existingRel, pendingConnection, isEdit])
 
   const handleClose = () => {
     if (isCreate) setPendingConnection(null)

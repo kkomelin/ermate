@@ -153,7 +153,7 @@ export function TableEditor() {
     <div
       className={cn(
         'bg-card absolute top-0 right-0 z-20 flex h-full w-[320px] flex-col border-l font-mono shadow-lg',
-        'animate-in slide-in-from-right duration-200'
+        'motion-safe:animate-in motion-safe:slide-in-from-right motion-safe:duration-200'
       )}
     >
       {/* Header */}
@@ -235,6 +235,7 @@ export function TableEditor() {
         <Button
           variant="outline"
           size="sm"
+          aria-label="Delete table"
           className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive w-full gap-1.5"
           onClick={handleDeleteTable}
         >

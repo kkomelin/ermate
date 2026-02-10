@@ -23,6 +23,9 @@ const nodeTypes: NodeTypes = {
   table: TableNode,
 }
 
+const FIT_VIEW_OPTIONS = { maxZoom: 1 } as const
+const PRO_OPTIONS = { hideAttribution: true } as const
+
 export function SchemaCanvas() {
   const { theme, toggleTheme } = useTheme()
   const schema = useSchemaStore((s) => s.schema)
@@ -232,13 +235,13 @@ export function SchemaCanvas() {
       onEdgeClick={onEdgeClick}
       onPaneClick={onPaneClick}
       fitView
-      fitViewOptions={{ maxZoom: 1 }}
+      fitViewOptions={FIT_VIEW_OPTIONS}
       snapToGrid
       snapGrid={[16, 16]}
       minZoom={0.25}
       maxZoom={2}
       className="bg-background"
-      proOptions={{ hideAttribution: true }}
+      proOptions={PRO_OPTIONS}
     >
       <Background
         variant={BackgroundVariant.Lines}

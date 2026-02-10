@@ -14,45 +14,43 @@ import {
 import { useMemo } from 'react'
 
 function describeChange(prev: Schema, curr: Schema): string {
+  const prevById = new Map(prev.tables.map((t) => [t.id, t]))
+  const currById = new Map(curr.tables.map((t) => [t.id, t]))
+
   // Table additions
   if (curr.tables.length > prev.tables.length) {
-    const added = curr.tables.find(
-      (t) => !prev.tables.some((pt) => pt.id === t.id)
-    )
+    const added = curr.tables.find((t) => !prevById.has(t.id))
     if (added) return `Added table "${added.name}"`
   }
 
   // Table removals
   if (curr.tables.length < prev.tables.length) {
-    const removed = prev.tables.find(
-      (t) => !curr.tables.some((ct) => ct.id === t.id)
-    )
+    const removed = prev.tables.find((t) => !currById.has(t.id))
     if (removed) return `Removed table "${removed.name}"`
   }
 
   // Per-table changes
   for (const ct of curr.tables) {
-    const pt = prev.tables.find((t) => t.id === ct.id)
+    const pt = prevById.get(ct.id)
     if (!pt) continue
 
     if (pt.name !== ct.name) return `Renamed table "${pt.name}" to "${ct.name}"`
 
+    const prevColById = new Map(pt.columns.map((c) => [c.id, c]))
+    const currColById = new Map(ct.columns.map((c) => [c.id, c]))
+
     if (ct.columns.length > pt.columns.length) {
-      const added = ct.columns.find(
-        (c) => !pt.columns.some((pc) => pc.id === c.id)
-      )
+      const added = ct.columns.find((c) => !prevColById.has(c.id))
       if (added) return `Added column "${added.name}" to "${ct.name}"`
     }
 
     if (ct.columns.length < pt.columns.length) {
-      const removed = pt.columns.find(
-        (c) => !ct.columns.some((cc) => cc.id === c.id)
-      )
+      const removed = pt.columns.find((c) => !currColById.has(c.id))
       if (removed) return `Removed column "${removed.name}" from "${ct.name}"`
     }
 
     for (const cc of ct.columns) {
-      const pc = pt.columns.find((c) => c.id === cc.id)
+      const pc = prevColById.get(cc.id)
       if (!pc) continue
       if (pc.name !== cc.name)
         return `Renamed column "${pc.name}" to "${cc.name}" in "${ct.name}"`
@@ -85,11 +83,22 @@ function describeChange(prev: Schema, curr: Schema): string {
 }
 
 export function LogBar() {
-  const schema = useSchemaStore((s) => s.schema)
-  const pastStates = useTemporalStore((s) => s.pastStates)
   const { issues, errors, warnings } = useValidation()
 
+  const expanded = useLogBarStore((s) => s.expanded)
+  const toggle = useLogBarStore((s) => s.toggle)
+  const activeTab = useLogBarStore((s) => s.activeTab)
+  const setActiveTab = useLogBarStore((s) => s.setActiveTab)
+
+  // Only subscribe to history data when the panel is expanded on the history tab
+  const showHistory = expanded && activeTab === 'history'
+  const schema = useSchemaStore((s) => (showHistory ? s.schema : null))
+  const pastStates = useTemporalStore((s) =>
+    showHistory ? s.pastStates : []
+  )
+
   const historyEntries = useMemo(() => {
+    if (!schema) return []
     const entries: string[] = []
     for (let i = 1; i < pastStates.length; i++) {
       const prev = pastStates[i - 1]?.schema
@@ -102,11 +111,6 @@ export function LogBar() {
     }
     return entries.reverse()
   }, [pastStates, schema])
-
-  const expanded = useLogBarStore((s) => s.expanded)
-  const toggle = useLogBarStore((s) => s.toggle)
-  const activeTab = useLogBarStore((s) => s.activeTab)
-  const setActiveTab = useLogBarStore((s) => s.setActiveTab)
 
   return (
     <div className="bg-card/95 border-t shadow-lg backdrop-blur-sm">
