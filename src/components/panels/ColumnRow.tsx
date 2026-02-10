@@ -14,7 +14,8 @@ import { ConfirmDelete } from './ConfirmDelete'
 import { cn } from '@/lib/utils'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { memo } from 'react'
+import { memo, useCallback } from 'react'
+import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 
 const COLUMN_TYPES: { value: ColumnType; label: string }[] = [
   { value: CT.VARCHAR, label: 'VARCHAR' },
@@ -61,6 +62,38 @@ const CONSTRAINT_TOGGLES: {
       'bg-sky-500/15 text-sky-700 dark:text-sky-400 border-sky-500/40',
   },
 ]
+
+/** Isolated column name input — holds debounce state without affecting drag re-renders. */
+const ColumnNameInput = memo(function ColumnNameInput({
+  columnId,
+  name,
+  onUpdate,
+}: {
+  columnId: string
+  name: string
+  onUpdate: (
+    columnId: string,
+    updates: Partial<Pick<Column, 'name' | 'type' | 'constraints'>>
+  ) => void
+}) {
+  const handleCommit = useCallback(
+    (value: string) => onUpdate(columnId, { name: value }),
+    [onUpdate, columnId]
+  )
+
+  const [localName, setLocalName] = useDebouncedValue(name, handleCommit)
+
+  return (
+    <Input
+      value={localName}
+      onChange={(e) => setLocalName(e.target.value)}
+      aria-label="Column name"
+      autoComplete="off"
+      className="focus-visible:border-border focus-visible:bg-background h-7 flex-1 rounded-sm border-transparent bg-transparent px-1.5 font-mono text-xs shadow-none transition-colors"
+      placeholder="column_name"
+    />
+  )
+})
 
 interface ColumnRowProps {
   column: Column
@@ -115,14 +148,7 @@ function ColumnRowComponent({ column, onUpdate, onRemove }: ColumnRowProps) {
       </button>
 
       {/* Column name */}
-      <Input
-        value={column.name}
-        onChange={(e) => onUpdate(column.id, { name: e.target.value })}
-        aria-label="Column name"
-        autoComplete="off"
-        className="focus-visible:border-border focus-visible:bg-background h-7 flex-1 rounded-sm border-transparent bg-transparent px-1.5 font-mono text-xs shadow-none transition-colors"
-        placeholder="column_name"
-      />
+      <ColumnNameInput columnId={column.id} name={column.name} onUpdate={onUpdate} />
 
       {/* Type selector */}
       <Select

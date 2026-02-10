@@ -23,12 +23,48 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, memo } from 'react'
+import { useDebouncedValue } from '@/hooks/useDebouncedValue'
+
+/** Isolated table name input — re-renders on keystrokes without touching the column list. */
+const TableNameInput = memo(function TableNameInput({
+  tableId,
+  name,
+}: {
+  tableId: string
+  name: string
+}) {
+  const updateTable = useSchemaStore((s) => s.updateTable)
+
+  const handleCommit = useCallback(
+    (value: string) => updateTable(tableId, { name: value }),
+    [updateTable, tableId]
+  )
+
+  const [localName, setLocalName] = useDebouncedValue(name, handleCommit)
+
+  return (
+    <div className="px-3 pt-3 pb-2">
+      <Label
+        htmlFor="table-name"
+        className="text-muted-foreground mb-1.5 text-[10px] tracking-wider uppercase"
+      >
+        Name
+      </Label>
+      <Input
+        id="table-name"
+        autoComplete="off"
+        value={localName}
+        onChange={(e) => setLocalName(e.target.value)}
+        className="h-8 font-mono text-sm font-semibold shadow-none"
+      />
+    </div>
+  )
+})
 
 export function TableEditor() {
   const schema = useSchemaStore((s) => s.schema)
   const selectedTableId = useSchemaStore((s) => s.selectedTableId)
-  const updateTable = useSchemaStore((s) => s.updateTable)
   const addColumn = useSchemaStore((s) => s.addColumn)
   const updateColumn = useSchemaStore((s) => s.updateColumn)
   const removeColumn = useSchemaStore((s) => s.removeColumn)
@@ -54,53 +90,61 @@ export function TableEditor() {
   )
 
   const handleAddColumn = useCallback(() => {
-    if (!table) return
-    addColumn(table.id, {
-      name: `column_${table.columns.length + 1}`,
+    if (!selectedTableId) return
+    const t = useSchemaStore.getState().schema.tables.find(
+      (t) => t.id === selectedTableId
+    )
+    if (!t) return
+    addColumn(selectedTableId, {
+      name: `column_${t.columns.length + 1}`,
       type: ColumnType.VARCHAR,
       constraints: [],
     })
-  }, [addColumn, table])
+  }, [addColumn, selectedTableId])
 
   const handleDeleteTable = useCallback(() => {
-    if (!table) return
-    removeTable(table.id)
-  }, [removeTable, table])
+    if (!selectedTableId) return
+    removeTable(selectedTableId)
+  }, [removeTable, selectedTableId])
 
   const handleUpdateColumn = useCallback(
     (
       columnId: string,
       updates: Partial<Pick<Column, 'name' | 'type' | 'constraints'>>
     ) => {
-      if (!table) return
-      updateColumn(table.id, columnId, updates)
+      if (!selectedTableId) return
+      updateColumn(selectedTableId, columnId, updates)
     },
-    [updateColumn, table]
+    [updateColumn, selectedTableId]
   )
 
   const handleRemoveColumn = useCallback(
     (columnId: string) => {
-      if (!table) return
-      removeColumn(table.id, columnId)
+      if (!selectedTableId) return
+      removeColumn(selectedTableId, columnId)
     },
-    [removeColumn, table]
+    [removeColumn, selectedTableId]
   )
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
-      if (!table) return
+      if (!selectedTableId) return
       const { active, over } = event
 
       if (over && active.id !== over.id) {
-        const oldIndex = table.columns.findIndex((col) => col.id === active.id)
-        const newIndex = table.columns.findIndex((col) => col.id === over.id)
+        const cols = useSchemaStore.getState().schema.tables.find(
+          (t) => t.id === selectedTableId
+        )?.columns
+        if (!cols) return
+        const oldIndex = cols.findIndex((col) => col.id === active.id)
+        const newIndex = cols.findIndex((col) => col.id === over.id)
 
         if (oldIndex !== -1 && newIndex !== -1) {
-          reorderColumns(table.id, oldIndex, newIndex)
+          reorderColumns(selectedTableId, oldIndex, newIndex)
         }
       }
     },
-    [table, reorderColumns]
+    [reorderColumns, selectedTableId]
   )
 
   // Early return must come AFTER all hooks
@@ -132,21 +176,7 @@ export function TableEditor() {
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {/* Table name */}
-        <div className="px-3 pt-3 pb-2">
-          <Label
-            htmlFor="table-name"
-            className="text-muted-foreground mb-1.5 text-[10px] tracking-wider uppercase"
-          >
-            Name
-          </Label>
-          <Input
-            id="table-name"
-            autoComplete="off"
-            value={table.name}
-            onChange={(e) => updateTable(table.id, { name: e.target.value })}
-            className="h-8 font-mono text-sm font-semibold shadow-none"
-          />
-        </div>
+        <TableNameInput tableId={table.id} name={table.name} />
 
         <Separator />
 

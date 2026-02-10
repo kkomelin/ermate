@@ -58,10 +58,10 @@ export function SchemaCanvas() {
     }
   }, [fitView])
 
-  // Handle Delete key press
+  // Handle Delete key press — read schema from store at event time to avoid
+  // re-registering the listener on every schema change (which happens per keystroke).
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Only handle Delete if not in an input field
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement
@@ -71,23 +71,20 @@ export function SchemaCanvas() {
 
       if (e.key === 'Delete') {
         e.preventDefault()
-        if (selectedTableId) {
-          const table = schema.tables.find((t) => t.id === selectedTableId)
+        const { schema: s, selectedTableId: tableId, selectedRelationshipId: relId } =
+          useSchemaStore.getState()
+
+        if (tableId) {
+          const table = s.tables.find((t) => t.id === tableId)
           if (table) {
             setDeleteTarget({ type: 'table', id: table.id, name: table.name })
             setShowDeleteConfirm(true)
           }
-        } else if (selectedRelationshipId) {
-          const rel = schema.relationships.find(
-            (r) => r.id === selectedRelationshipId
-          )
+        } else if (relId) {
+          const rel = s.relationships.find((r) => r.id === relId)
           if (rel) {
-            const sourceTable = schema.tables.find(
-              (t) => t.id === rel.source.tableId
-            )
-            const targetTable = schema.tables.find(
-              (t) => t.id === rel.target.tableId
-            )
+            const sourceTable = s.tables.find((t) => t.id === rel.source.tableId)
+            const targetTable = s.tables.find((t) => t.id === rel.target.tableId)
             const name = `${sourceTable?.name ?? '?'} → ${targetTable?.name ?? '?'}`
             setDeleteTarget({ type: 'relationship', id: rel.id, name })
             setShowDeleteConfirm(true)
@@ -98,12 +95,7 @@ export function SchemaCanvas() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [
-    selectedTableId,
-    selectedRelationshipId,
-    schema.tables,
-    schema.relationships,
-  ])
+  }, [])
 
   // Store nodes in local state for React Flow
   const [nodes, setNodes] = useState<Node[]>(() =>
