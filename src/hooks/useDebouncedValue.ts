@@ -15,9 +15,10 @@ export function useDebouncedValue(
   const isEditingRef = useRef(false)
 
   // Sync from store when not actively editing (e.g. undo/redo, external change)
+  // Local state needed to decouple typing from debounced store commits
   useEffect(() => {
     if (!isEditingRef.current) {
-      setLocal(storeValue)
+      setLocal(storeValue) // eslint-disable-line react-hooks/set-state-in-effect
     }
   }, [storeValue])
 

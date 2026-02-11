@@ -40,14 +40,12 @@ function EndpointLabel({
   columnName: string
 }) {
   return (
-    <div className="border-border/60 bg-muted/40 w-full min-w-0 break-all rounded-md border px-2.5 py-1.5">
+    <div className="border-border/60 bg-muted/40 w-full min-w-0 rounded-md border px-2.5 py-1.5 break-all">
       <span className="text-card-foreground text-xs font-semibold">
         {tableName}
       </span>
       <span className="text-muted-foreground text-[10px]">.</span>
-      <span className="text-muted-foreground text-[11px]">
-        {columnName}
-      </span>
+      <span className="text-muted-foreground text-[11px]">{columnName}</span>
     </div>
   )
 }
@@ -98,25 +96,51 @@ export function RelationshipEditor() {
       },
     }
 
-    if (!sourceCol || !targetCol) return { endpoints: endpointData, fkTarget: null }
+    if (!sourceCol || !targetCol)
+      return { endpoints: endpointData, fkTarget: null }
 
-    const sourceIsPk = sourceCol.constraints.includes(ColumnConstraint.PRIMARY_KEY)
-    const targetIsPk = targetCol.constraints.includes(ColumnConstraint.PRIMARY_KEY)
+    const sourceIsPk = sourceCol.constraints.includes(
+      ColumnConstraint.PRIMARY_KEY
+    )
+    const targetIsPk = targetCol.constraints.includes(
+      ColumnConstraint.PRIMARY_KEY
+    )
 
-    let fk: { tableId: string; columnId: string; tableName: string; columnName: string } | null = null
-    if (sourceIsPk && !targetCol.constraints.includes(ColumnConstraint.FOREIGN_KEY)) {
-      fk = { tableId: target.tableId, columnId: target.columnId, tableName: targetTable!.name, columnName: targetCol.name }
-    } else if (targetIsPk && !sourceCol.constraints.includes(ColumnConstraint.FOREIGN_KEY)) {
-      fk = { tableId: source.tableId, columnId: source.columnId, tableName: sourceTable!.name, columnName: sourceCol.name }
+    let fk: {
+      tableId: string
+      columnId: string
+      tableName: string
+      columnName: string
+    } | null = null
+    if (
+      sourceIsPk &&
+      !targetCol.constraints.includes(ColumnConstraint.FOREIGN_KEY)
+    ) {
+      fk = {
+        tableId: target.tableId,
+        columnId: target.columnId,
+        tableName: targetTable!.name,
+        columnName: targetCol.name,
+      }
+    } else if (
+      targetIsPk &&
+      !sourceCol.constraints.includes(ColumnConstraint.FOREIGN_KEY)
+    ) {
+      fk = {
+        tableId: source.tableId,
+        columnId: source.columnId,
+        tableName: sourceTable!.name,
+        columnName: sourceCol.name,
+      }
     }
 
     return { endpoints: endpointData, fkTarget: fk }
   }, [schema.tables, existingRel, pendingConnection, isEdit])
 
-  // Sync state when dialog opens
+  // Reset form state when dialog identity changes (open/switch between create and edit)
   useEffect(() => {
     if (existingRel) {
-      setRelType(existingRel.type)
+      setRelType(existingRel.type) // eslint-disable-line react-hooks/set-state-in-effect
       setGenJunction(false)
       setAddFk(false)
     } else if (pendingConnection) {

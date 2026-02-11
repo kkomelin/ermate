@@ -79,6 +79,8 @@ export function SchemaCanvas() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
+    // Stable zustand selectors; fresh state read via getState() at event time
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Store nodes in local state for React Flow
@@ -97,6 +99,7 @@ export function SchemaCanvas() {
   )
 
   // Sync nodes when tables are added/removed/updated (but not on selection change)
+  // React Flow requires local node state; syncing from store is the standard pattern
   useEffect(() => {
     setNodes((currentNodes) => {
       // Create a map of current nodes by id

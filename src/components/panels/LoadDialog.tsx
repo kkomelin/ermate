@@ -36,9 +36,10 @@ export function LoadDialog({ open, onOpenChange }: LoadDialogProps) {
   const newSchema = useSchemaStore((s) => s.newSchema)
   const [schemas, setSchemas] = useState<SchemaMeta[]>([])
 
+  // Stateful for optimistic delete filtering; sync read on dialog open
   useEffect(() => {
     if (open) {
-      setSchemas(DalService.listSchemas())
+      setSchemas(DalService.listSchemas()) // eslint-disable-line react-hooks/set-state-in-effect
     }
   }, [open])
 

@@ -11,7 +11,8 @@
     "format": "prettier --write 'src/**/*.{ts,tsx,js,jsx,css,html}'",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "check": "pnpm typecheck && pnpm lint && pnpm test"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

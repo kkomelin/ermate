@@ -10,6 +10,8 @@
 
 5. Use `frontend-design` skill to design the aesthetics.
 
-6. User `lucide-react` for icons.
+6. Use `lucide-react` for icons.
 
-7. Avoid using `—` or similar ai-slop in texts.
+7. Use `pnpm format && pnpm check` before committing.
+
+8. Avoid using `—` or similar ai-slop in texts.
