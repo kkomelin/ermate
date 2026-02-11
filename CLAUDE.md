@@ -12,6 +12,4 @@
 
 6. Use `lucide-react` for icons.
 
-7. Use `pnpm format && pnpm check` before committing.
-
-8. Avoid using `—` or similar ai-slop in texts.
+7. Avoid using `—` or similar ai-slop in texts.
