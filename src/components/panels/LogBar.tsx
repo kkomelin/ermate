@@ -93,9 +93,7 @@ export function LogBar() {
   // Only subscribe to history data when the panel is expanded on the history tab
   const showHistory = expanded && activeTab === 'history'
   const schema = useSchemaStore((s) => (showHistory ? s.schema : null))
-  const pastStates = useTemporalStore((s) =>
-    showHistory ? s.pastStates : []
-  )
+  const pastStates = useTemporalStore((s) => (showHistory ? s.pastStates : []))
 
   const historyEntries = useMemo(() => {
     if (!schema) return []
