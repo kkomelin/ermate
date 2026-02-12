@@ -2,7 +2,7 @@ import type {
   Schema,
   Table,
   Relationship,
-} from '../../src/types/schema.ts'
+} from '../../src/types/schema'
 
 function serializeColumn(col: { name: string; type: string; constraints: string[] }): string {
   const parts = [col.name, col.type]
@@ -33,8 +33,8 @@ function serializeSchema(schema: Schema): string {
   const rels =
     schema.relationships.length > 0
       ? schema.relationships
-          .map((r) => serializeRelationship(r, schema))
-          .join('\n')
+        .map((r) => serializeRelationship(r, schema))
+        .join('\n')
       : '(none)'
 
   return `Tables:\n${tables}\n\nRelationships:\n${rels}`
