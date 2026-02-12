@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import { LoaderIcon, SendIcon, SparklesIcon, WifiOffIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSchemaPrompt } from '@/hooks/useSchemaPrompt'
@@ -36,11 +42,13 @@ export function PromptBar() {
     }
   }, [lastMessage])
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     const trimmed = value.trim()
     if (!trimmed || isLoading || !isOnline) return
-    setValue('')
-    submit(trimmed)
+    const success = await submit(trimmed)
+    if (success) {
+      setValue('')
+    }
   }, [value, isLoading, isOnline, submit])
 
   const handleKeyDown = useCallback(

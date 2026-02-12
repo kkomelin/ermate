@@ -26,7 +26,7 @@ export function useSchemaPrompt() {
   }, [getViewport])
 
   const submit = useCallback(
-    async (prompt: string) => {
+    async (prompt: string): Promise<boolean> => {
       // Read fresh state at submission time
       const { schema, selectedTableId, selectedRelationshipId } =
         useSchemaStore.getState()
@@ -49,14 +49,17 @@ export function useSchemaPrompt() {
           applyAction(freshStore, { undo, redo }, action, getPosition)
         }
 
-        const msg =
-          text || actions.map((a) => a.message).join('. ') || 'Done'
+        const msg = text || actions.map((a) => a.message).join('. ') || 'Done'
         setLastMessage(msg)
+        return true
       } catch (err) {
         console.error('[useSchemaPrompt] error:', err)
         setLastMessage(
-          err instanceof Error ? err.message : 'Something went wrong. Try again.'
+          err instanceof Error
+            ? err.message
+            : 'Something went wrong. Try again.'
         )
+        return false
       } finally {
         setIsLoading(false)
       }

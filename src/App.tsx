@@ -38,7 +38,7 @@ function App() {
     <TooltipProvider>
       <ReactFlowProvider>
         <AppInner />
-        <Toaster position="bottom-right" richColors theme={theme} />
+        <Toaster position="top-center" richColors theme={theme} />
       </ReactFlowProvider>
     </TooltipProvider>
   )
