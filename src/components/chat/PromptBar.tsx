@@ -31,17 +31,15 @@ function getOnline() {
 
 export function PromptBar() {
   const { isSignedIn } = useUser()
-  const { submit, isLoading, lastMessage, isError } = useSchemaPrompt()
+  const { submit, isLoading, lastMessage, isError, msgKey } = useSchemaPrompt()
   const isOnline = useSyncExternalStore(subscribeOnline, getOnline)
   const isEmpty = useSchemaStore((s) => s.schema.tables.length === 0)
   const [value, setValue] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
-  const prevMessageRef = useRef<string | null>(null)
 
   // Show toast when AI responds
   useEffect(() => {
-    if (lastMessage && lastMessage !== prevMessageRef.current) {
-      prevMessageRef.current = lastMessage
+    if (lastMessage) {
       const opts = { duration: 10000, closeButton: true }
       if (isError) {
         toast.error(lastMessage, opts)
@@ -49,7 +47,9 @@ export function PromptBar() {
         toast.success(lastMessage, opts)
       }
     }
-  }, [lastMessage, isError])
+    // msgKey ensures the effect fires even for duplicate messages
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [msgKey])
 
   // Auto-focus when signed in
   useEffect(() => {

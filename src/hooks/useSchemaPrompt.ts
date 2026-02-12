@@ -12,6 +12,7 @@ export function useSchemaPrompt() {
   const [isLoading, setIsLoading] = useState(false)
   const [lastMessage, setLastMessage] = useState<string | null>(null)
   const [isError, setIsError] = useState(false)
+  const [msgKey, setMsgKey] = useState(0)
 
   // Same positioning logic as Toolbar's handleAddTable
   const getPosition = useCallback((): Position => {
@@ -53,6 +54,7 @@ export function useSchemaPrompt() {
         const msg = text || actions.map((a) => a.message).join('. ') || 'Done'
         setLastMessage(msg)
         setIsError(false)
+        setMsgKey((k) => k + 1)
         return true
       } catch (err) {
         console.error('[useSchemaPrompt] error:', err)
@@ -62,6 +64,7 @@ export function useSchemaPrompt() {
             : 'Something went wrong. Try again.'
         )
         setIsError(true)
+        setMsgKey((k) => k + 1)
         return false
       } finally {
         setIsLoading(false)
@@ -70,5 +73,5 @@ export function useSchemaPrompt() {
     [undo, redo, getPosition]
   )
 
-  return { submit, isLoading, lastMessage, isError }
+  return { submit, isLoading, lastMessage, isError, msgKey }
 }
