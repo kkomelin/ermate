@@ -14,11 +14,15 @@ const Toaster = ({ theme = 'dark', ...props }: ToasterProps) => {
       className="toaster group"
       toastOptions={{
         classNames: {
-          toast: 'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg relative pr-20',
+          toast:
+            'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg relative pr-20',
           description: 'group-[.toast]:text-muted-foreground',
-          actionButton: 'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
-          cancelButton: 'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
-          closeButton: 'group-[.toast]:!bg-transparent group-[.toast]:hover:!bg-muted group-[.toast]:text-muted-foreground group-[.toast]:!absolute group-[.toast]:!right-3 group-[.toast]:!top-1/2 group-[.toast]:!-translate-y-1/2 group-[.toast]:!left-auto group-[.toast]:!border-0 group-[.toast]:!transform',
+          actionButton:
+            'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
+          cancelButton:
+            'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
+          closeButton:
+            'group-[.toast]:!bg-transparent group-[.toast]:hover:!bg-muted group-[.toast]:text-muted-foreground group-[.toast]:!absolute group-[.toast]:!right-3 group-[.toast]:!top-1/2 group-[.toast]:!-translate-y-1/2 group-[.toast]:!left-auto group-[.toast]:!border-0 group-[.toast]:!transform',
         },
       }}
       icons={{
