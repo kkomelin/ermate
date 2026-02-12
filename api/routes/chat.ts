@@ -1,8 +1,8 @@
-import type { Schema } from '@/types/schema'
-import { buildSystemPrompt } from '@api/lib/system-prompt'
-import { tools } from '@api/tools/index'
-import { generateText, stepCountIs } from 'ai'
 import { Hono } from 'hono'
+import { generateText, stepCountIs } from 'ai'
+import { tools } from '../tools/index'
+import { buildSystemPrompt } from '../lib/system-prompt'
+import type { Schema } from '@/types/schema'
 
 const chat = new Hono()
 
