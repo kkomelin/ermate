@@ -1,8 +1,4 @@
-import type {
-  Schema,
-  Table,
-  Relationship,
-} from '../../src/types/schema'
+import type { Relationship, Schema, Table } from '@/types/schema'
 
 function serializeColumn(col: { name: string; type: string; constraints: string[] }): string {
   const parts = [col.name, col.type]

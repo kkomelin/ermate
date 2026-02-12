@@ -1,6 +1,6 @@
+import { authMiddleware } from '@api/middleware/auth'
+import { chatRoute } from '@api/routes/chat'
 import { Hono } from 'hono'
-import { chatRoute } from './routes/chat'
-import { authMiddleware } from './middleware/auth'
 
 const app = new Hono().basePath('/api')
 

@@ -1,12 +1,17 @@
-import { createTable, createTableWithColumns, renameTable, deleteTable } from './tables'
-import { addColumn, updateColumn, deleteColumn } from './columns'
+import { addColumn, deleteColumn, updateColumn } from '@api/tools/columns'
+import {
+  createTable,
+  createTableWithColumns,
+  deleteTable,
+  renameTable,
+} from '@api/tools/tables'
+import { redo, undo } from './history'
 import {
   addRelationship,
-  updateRelationship,
   deleteRelationship,
   generateJunctionTable,
+  updateRelationship,
 } from './relationships'
-import { undo, redo } from './history'
 
 export const tools = {
   createTable,

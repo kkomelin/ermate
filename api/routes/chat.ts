@@ -1,8 +1,8 @@
-import { Hono } from 'hono'
+import type { Schema } from '@/types/schema'
+import { buildSystemPrompt } from '@api/lib/system-prompt'
+import { tools } from '@api/tools/index'
 import { generateText, stepCountIs } from 'ai'
-import { tools } from '../tools/index'
-import { buildSystemPrompt } from '../lib/system-prompt'
-import type { Schema } from '../../src/types/schema'
+import { Hono } from 'hono'
 
 const chat = new Hono()
 
@@ -38,8 +38,14 @@ chat.post('/', async (c) => {
 
     console.log('[chat] steps:', result.steps.length)
     for (const [i, step] of result.steps.entries()) {
-      console.log(`[chat] step ${i}: toolCalls=`, JSON.stringify(step.toolCalls, null, 2))
-      console.log(`[chat] step ${i}: toolResults=`, JSON.stringify(step.toolResults, null, 2))
+      console.log(
+        `[chat] step ${i}: toolCalls=`,
+        JSON.stringify(step.toolCalls, null, 2)
+      )
+      console.log(
+        `[chat] step ${i}: toolResults=`,
+        JSON.stringify(step.toolResults, null, 2)
+      )
     }
     console.log('[chat] final text:', result.text)
 
