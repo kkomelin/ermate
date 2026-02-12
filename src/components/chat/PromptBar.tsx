@@ -47,7 +47,7 @@ export function PromptBar() {
         toast.success(lastMessage, opts)
       }
     }
-  }, [lastMessage])
+  }, [lastMessage, isError])
 
   // Auto-focus when signed in
   useEffect(() => {
