@@ -21,7 +21,11 @@ export type AiAction =
       action: 'createTableWithColumns'
       params: {
         name: string
-        columns: { name: string; type: ColumnType; constraints: ColumnConstraint[] }[]
+        columns: {
+          name: string
+          type: ColumnType
+          constraints: ColumnConstraint[]
+        }[]
       }
       message: string
     }
@@ -146,9 +150,7 @@ interface TemporalActions {
 // ---------------------------------------------------------------------------
 
 function resolveTable(schema: Schema, name: string) {
-  return schema.tables.find(
-    (t) => t.name.toLowerCase() === name.toLowerCase()
-  )
+  return schema.tables.find((t) => t.name.toLowerCase() === name.toLowerCase())
 }
 
 function resolveColumn(schema: Schema, tableName: string, columnName: string) {
@@ -257,7 +259,11 @@ export function applyAction(
         console.warn('[applyAction] Column not found:', action.params)
         break
       }
-      store.updateColumn(resolved.tableId, resolved.columnId, action.params.updates)
+      store.updateColumn(
+        resolved.tableId,
+        resolved.columnId,
+        action.params.updates
+      )
       break
     }
 
@@ -287,7 +293,10 @@ export function applyAction(
         action.params.targetColumn
       )
       if (!source || !target) {
-        console.warn('[applyAction] Could not resolve relationship:', action.params)
+        console.warn(
+          '[applyAction] Could not resolve relationship:',
+          action.params
+        )
         break
       }
       store.addRelationship({ source, target, type: action.params.type })
@@ -309,7 +318,10 @@ export function applyAction(
       const srcTable = resolveTable(store.schema, action.params.sourceTable)
       const tgtTable = resolveTable(store.schema, action.params.targetTable)
       if (!srcTable || !tgtTable) {
-        console.warn('[applyAction] Tables not found for junction:', action.params)
+        console.warn(
+          '[applyAction] Tables not found for junction:',
+          action.params
+        )
         break
       }
       store.generateJunctionTable(srcTable.id, tgtTable.id)
