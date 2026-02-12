@@ -1,7 +1,9 @@
 import { Hono } from 'hono'
 import { generateText, stepCountIs } from 'ai'
+import { getAuth } from '@clerk/hono'
 import { tools } from '../tools/index.js'
 import { buildSystemPrompt } from '../lib/system-prompt.js'
+import { validatePrompt, checkRateLimit } from '../lib/guard.js'
 import type { Schema } from '@/types/schema'
 
 const chat = new Hono()
@@ -15,8 +17,20 @@ chat.post('/', async (c) => {
       selectedRelationshipId: string | null
     }>()
 
-  if (!prompt?.trim()) {
-    return c.json({ error: 'Prompt is required' }, 400)
+  const auth = getAuth(c)
+  const userId = auth?.userId
+  if (!userId) {
+    return c.json({ error: 'Unauthorized' }, 401)
+  }
+
+  const rateCheck = checkRateLimit(userId)
+  if (!rateCheck.ok) {
+    return c.json({ error: rateCheck.error }, 429)
+  }
+
+  const validation = validatePrompt(prompt)
+  if (!validation.ok) {
+    return c.json({ error: validation.error }, 400)
   }
 
   try {

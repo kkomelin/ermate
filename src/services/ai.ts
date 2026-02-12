@@ -185,8 +185,8 @@ export async function submitPrompt(
   })
 
   if (!res.ok) {
-    const body = await res.text().catch(() => '')
-    throw new Error(`AI request failed (${res.status}): ${body}`)
+    const body = await res.json().catch(() => null)
+    throw new Error(body?.error || `AI request failed (${res.status})`)
   }
 
   return res.json()
