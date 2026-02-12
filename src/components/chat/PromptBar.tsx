@@ -8,6 +8,12 @@ import {
 import { LoaderIcon, SendIcon, SparklesIcon, WifiOffIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSchemaPrompt } from '@/hooks/useSchemaPrompt'
+import { SignInButton, useUser } from '@clerk/clerk-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 function subscribeOnline(cb: () => void) {
   window.addEventListener('online', cb)
@@ -23,6 +29,7 @@ function getOnline() {
 }
 
 export function PromptBar() {
+  const { isSignedIn } = useUser()
   const { submit, isLoading, lastMessage } = useSchemaPrompt()
   const isOnline = useSyncExternalStore(subscribeOnline, getOnline)
   const [value, setValue] = useState('')
@@ -42,14 +49,22 @@ export function PromptBar() {
     }
   }, [lastMessage])
 
+  // Auto-focus when signed in
+  useEffect(() => {
+    if (isSignedIn) {
+      inputRef.current?.focus()
+    }
+  }, [isSignedIn])
+
   const handleSubmit = useCallback(async () => {
+    if (!isSignedIn) return
     const trimmed = value.trim()
     if (!trimmed || isLoading || !isOnline) return
     const success = await submit(trimmed)
     if (success) {
       setValue('')
     }
-  }, [value, isLoading, isOnline, submit])
+  }, [value, isLoading, isOnline, submit, isSignedIn])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -84,31 +99,51 @@ export function PromptBar() {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          disabled={disabled}
+          disabled={disabled || !isSignedIn}
           placeholder={
             !isOnline
               ? 'AI requires an internet connection'
-              : isLoading
-                ? 'Working on it...'
-                : 'Describe a schema change...'
+              : !isSignedIn
+                ? 'Sign in to use AI features'
+                : isLoading
+                  ? 'Working on it...'
+                  : 'Describe a schema change...'
           }
           className="text-foreground placeholder:text-muted-foreground h-7 flex-1 bg-transparent text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50"
         />
 
         {/* Submit button */}
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={disabled || !value.trim()}
-          aria-label="Send prompt"
-          className="bg-primary text-primary-foreground hover:bg-primary/90 flex size-7 shrink-0 items-center justify-center rounded-md transition-opacity disabled:pointer-events-none disabled:opacity-30"
-        >
-          {isLoading ? (
-            <LoaderIcon className="size-3.5 animate-spin" />
-          ) : (
-            <SendIcon className="size-3.5" />
-          )}
-        </button>
+        {isSignedIn ? (
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={disabled || !value.trim()}
+            aria-label="Send prompt"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 flex size-7 shrink-0 items-center justify-center rounded-md transition-opacity disabled:pointer-events-none disabled:opacity-30"
+          >
+            {isLoading ? (
+              <LoaderIcon className="size-3.5 animate-spin" />
+            ) : (
+              <SendIcon className="size-3.5" />
+            )}
+          </button>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <SignInButton mode="modal">
+                <button
+                  type="button"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 flex h-7 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-medium transition-opacity"
+                >
+                  Sign In
+                </button>
+              </SignInButton>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Sign in to unlock the ai design</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
       </div>
     </div>
   )
