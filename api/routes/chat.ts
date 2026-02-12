@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { generateText, stepCountIs } from 'ai'
-import { tools } from '../tools/index'
-import { buildSystemPrompt } from '../lib/system-prompt'
+import { tools } from '../tools/index.js'
+import { buildSystemPrompt } from '../lib/system-prompt.js'
 import type { Schema } from '@/types/schema'
 
 const chat = new Hono()

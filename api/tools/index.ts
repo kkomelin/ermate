@@ -1,12 +1,12 @@
-import { createTable, createTableWithColumns, renameTable, deleteTable } from './tables'
-import { addColumn, updateColumn, deleteColumn } from './columns'
+import { createTable, createTableWithColumns, renameTable, deleteTable } from './tables.js'
+import { addColumn, updateColumn, deleteColumn } from './columns.js'
 import {
   addRelationship,
   updateRelationship,
   deleteRelationship,
   generateJunctionTable,
-} from './relationships'
-import { undo, redo } from './history'
+} from './relationships.js'
+import { undo, redo } from './history.js'
 
 export const tools = {
   createTable,
