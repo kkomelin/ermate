@@ -1,5 +1,6 @@
 import { SchemaCanvas } from '@/components/canvas/SchemaCanvas'
 import { Toolbar } from '@/components/canvas/Toolbar'
+import { PromptBar } from '@/components/chat/PromptBar'
 import { LogBar } from '@/components/panels/LogBar'
 import { RelationshipEditor } from '@/components/panels/RelationshipEditor'
 import { TableEditor } from '@/components/panels/TableEditor'
@@ -21,6 +22,7 @@ function AppInner() {
       <div className="relative min-h-0 flex-1">
         <Toolbar />
         <SchemaCanvas />
+        <PromptBar />
         <TableEditor />
         <RelationshipEditor />
       </div>
@@ -36,7 +38,7 @@ function App() {
     <TooltipProvider>
       <ReactFlowProvider>
         <AppInner />
-        <Toaster position="bottom-center" richColors theme={theme} />
+        <Toaster position="bottom-right" richColors theme={theme} />
       </ReactFlowProvider>
     </TooltipProvider>
   )
