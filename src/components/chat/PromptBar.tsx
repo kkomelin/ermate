@@ -30,7 +30,7 @@ function getOnline() {
 
 export function PromptBar() {
   const { isSignedIn } = useUser()
-  const { submit, isLoading, lastMessage } = useSchemaPrompt()
+  const { submit, isLoading, lastMessage, isError } = useSchemaPrompt()
   const isOnline = useSyncExternalStore(subscribeOnline, getOnline)
   const [value, setValue] = useState(
     'create users database with name, email, and password'
@@ -43,7 +43,7 @@ export function PromptBar() {
     if (lastMessage && lastMessage !== prevMessageRef.current) {
       prevMessageRef.current = lastMessage
       const opts = { duration: 10000, closeButton: true }
-      if (lastMessage.toLowerCase().includes('wrong')) {
+      if (isError) {
         toast.error(lastMessage, opts)
       } else {
         toast.success(lastMessage, opts)
