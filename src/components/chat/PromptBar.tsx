@@ -8,6 +8,7 @@ import {
 import { LoaderIcon, SendIcon, SparklesIcon, WifiOffIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSchemaPrompt } from '@/hooks/useSchemaPrompt'
+import { useSchemaStore } from '@/hooks/useSchemaStore'
 import { SignInButton, useUser } from '@clerk/clerk-react'
 import {
   Tooltip,
@@ -32,7 +33,8 @@ export function PromptBar() {
   const { isSignedIn } = useUser()
   const { submit, isLoading, lastMessage, isError } = useSchemaPrompt()
   const isOnline = useSyncExternalStore(subscribeOnline, getOnline)
-  const [value, setValue] = useState('create users table with name and email')
+  const isEmpty = useSchemaStore((s) => s.schema.tables.length === 0)
+  const [value, setValue] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const prevMessageRef = useRef<string | null>(null)
 
@@ -107,7 +109,9 @@ export function PromptBar() {
                 ? 'Sign in to use AI features'
                 : isLoading
                   ? 'Working on it...'
-                  : 'Describe a schema change...'
+                  : isEmpty
+                    ? 'e.g. create users table with name and email'
+                    : 'Describe a schema change...'
           }
           className="text-foreground placeholder:text-muted-foreground h-7 flex-1 bg-transparent text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50"
         />
