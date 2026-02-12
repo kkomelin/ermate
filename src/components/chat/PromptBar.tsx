@@ -32,9 +32,7 @@ export function PromptBar() {
   const { isSignedIn } = useUser()
   const { submit, isLoading, lastMessage, isError } = useSchemaPrompt()
   const isOnline = useSyncExternalStore(subscribeOnline, getOnline)
-  const [value, setValue] = useState(
-    'create users table with name and email'
-  )
+  const [value, setValue] = useState('create users table with name and email')
   const inputRef = useRef<HTMLInputElement>(null)
   const prevMessageRef = useRef<string | null>(null)
 
