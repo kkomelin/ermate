@@ -87,7 +87,7 @@ export function Toolbar() {
   const handleAddTable = useCallback(() => {
     const tables = useSchemaStore.getState().schema.tables
     const position = findOpenPosition(tables, getViewportCenter())
-    addTable(`table_${Date.now()}`, position)
+    addTable(`table_${Math.random().toString(36).slice(2, 6)}`, position)
   }, [addTable, getViewportCenter])
 
   async function handleShare() {
