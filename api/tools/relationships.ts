@@ -11,9 +11,7 @@ export const addRelationship = tool({
       .string()
       .describe('Name of the table being referenced (PK side)'),
     targetColumn: z.string().describe('Name of the referenced PK column'),
-    type: z
-      .enum(['1:1', '1:N', 'N:M'])
-      .describe('Relationship cardinality'),
+    type: z.enum(['1:1', '1:N', 'N:M']).describe('Relationship cardinality'),
   }),
   execute: async ({
     sourceTable,
@@ -31,6 +29,35 @@ export const addRelationship = tool({
       type,
     },
     message: `Created ${type} relationship: ${sourceTable}.${sourceColumn} -> ${targetTable}.${targetColumn}`,
+  }),
+})
+
+export const addMultipleRelationships = tool({
+  description:
+    'Create multiple foreign key relationships at once. Source is the FK side, target is the PK side. Use table and column NAMES (not IDs). Prefer this over calling addRelationship multiple times.',
+  inputSchema: z.object({
+    relationships: z
+      .array(
+        z.object({
+          sourceTable: z
+            .string()
+            .describe('Name of the table with the foreign key'),
+          sourceColumn: z.string().describe('Name of the FK column'),
+          targetTable: z
+            .string()
+            .describe('Name of the table being referenced (PK side)'),
+          targetColumn: z.string().describe('Name of the referenced PK column'),
+          type: z
+            .enum(['1:1', '1:N', 'N:M'])
+            .describe('Relationship cardinality'),
+        })
+      )
+      .describe('List of relationships to create'),
+  }),
+  execute: async ({ relationships }) => ({
+    action: 'addMultipleRelationships' as const,
+    params: { relationships },
+    message: `Created ${relationships.length} relationships`,
   }),
 })
 

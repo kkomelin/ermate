@@ -48,7 +48,8 @@ export function useSchemaPrompt() {
           (a) =>
             a &&
             (a.action === 'createTable' ||
-              a.action === 'createTableWithColumns')
+              a.action === 'createTableWithColumns' ||
+              a.action === 'createMultipleTables')
         )
 
         for (const action of actions) {

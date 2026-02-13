@@ -1,4 +1,5 @@
 import { useSchemaStore } from '@/hooks/useSchemaStore'
+import { createEmptySchema } from '@/services/schema'
 import type {
   Column,
   ColumnConstraint,
@@ -26,6 +27,20 @@ export type AiAction =
           name: string
           type: ColumnType
           constraints: ColumnConstraint[]
+        }[]
+      }
+      message: string
+    }
+  | {
+      action: 'createMultipleTables'
+      params: {
+        tables: {
+          name: string
+          columns: {
+            name: string
+            type: ColumnType
+            constraints: ColumnConstraint[]
+          }[]
         }[]
       }
       message: string
@@ -76,6 +91,19 @@ export type AiAction =
       message: string
     }
   | {
+      action: 'addMultipleRelationships'
+      params: {
+        relationships: {
+          sourceTable: string
+          sourceColumn: string
+          targetTable: string
+          targetColumn: string
+          type: RelationshipType
+        }[]
+      }
+      message: string
+    }
+  | {
       action: 'updateRelationship'
       params: {
         relationshipId: string
@@ -91,6 +119,11 @@ export type AiAction =
   | {
       action: 'generateJunctionTable'
       params: { sourceTable: string; targetTable: string }
+      message: string
+    }
+  | {
+      action: 'resetSchema'
+      params: Record<string, never>
       message: string
     }
   | {
@@ -110,6 +143,7 @@ export type AiAction =
 
 interface SchemaStore {
   schema: Schema
+  setSchema: (schema: Schema) => void
   addTable: (name: string, position: Position) => void
   addTableWithColumns: (
     name: string,
@@ -194,6 +228,75 @@ export async function submitPrompt(
 }
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function applyAddRelationship(
+  store: SchemaStore,
+  params: {
+    sourceTable: string
+    sourceColumn: string
+    targetTable: string
+    targetColumn: string
+    type: RelationshipType
+  }
+): void {
+  const target = resolveColumn(
+    store.schema,
+    params.targetTable,
+    params.targetColumn
+  )
+  if (!target) {
+    console.warn('[applyAction] Could not resolve target column:', params)
+    return
+  }
+
+  let source = resolveColumn(
+    store.schema,
+    params.sourceTable,
+    params.sourceColumn
+  )
+  if (!source) {
+    const sourceTable = resolveTable(store.schema, params.sourceTable)
+    if (!sourceTable) {
+      console.warn('[applyAction] Source table not found:', params.sourceTable)
+      return
+    }
+    const targetTable = resolveTable(store.schema, params.targetTable)
+    const targetCol = targetTable?.columns.find((c) => c.id === target.columnId)
+    store.addColumn(sourceTable.id, {
+      name: params.sourceColumn,
+      type: targetCol?.type ?? ('INTEGER' as ColumnType),
+      constraints: [
+        'FOREIGN KEY' as ColumnConstraint,
+        'NOT NULL' as ColumnConstraint,
+      ],
+    })
+    // Re-resolve after creation (must use fresh state since store.schema is stale)
+    source = resolveColumn(
+      useSchemaStore.getState().schema,
+      params.sourceTable,
+      params.sourceColumn
+    )
+    if (!source) {
+      console.warn('[applyAction] Failed to create FK column:', params)
+      return
+    }
+  } else {
+    // Column exists but may lack FOREIGN KEY constraint - add it
+    const sourceTable = resolveTable(store.schema, params.sourceTable)
+    const col = sourceTable?.columns.find((c) => c.id === source!.columnId)
+    if (col && !col.constraints.includes('FOREIGN KEY' as ColumnConstraint)) {
+      store.updateColumn(source.tableId, source.columnId, {
+        constraints: [...col.constraints, 'FOREIGN KEY' as ColumnConstraint],
+      })
+    }
+  }
+
+  store.addRelationship({ source, target, type: params.type })
+}
+
+// ---------------------------------------------------------------------------
 // Apply action to store (resolves names to IDs at apply time)
 // ---------------------------------------------------------------------------
 
@@ -214,6 +317,12 @@ export function applyAction(
         getPosition(),
         action.params.columns
       )
+      break
+
+    case 'createMultipleTables':
+      for (const t of action.params.tables) {
+        store.addTableWithColumns(t.name, getPosition(), t.columns)
+      }
       break
 
     case 'renameTable': {
@@ -282,89 +391,15 @@ export function applyAction(
       break
     }
 
-    case 'addRelationship': {
-      const target = resolveColumn(
-        store.schema,
-        action.params.targetTable,
-        action.params.targetColumn
-      )
-      if (!target) {
-        console.warn(
-          '[applyAction] Could not resolve target column:',
-          action.params
-        )
-        break
-      }
-
-      // Auto-create the FK column on the source table if it doesn't exist
-      let source = resolveColumn(
-        store.schema,
-        action.params.sourceTable,
-        action.params.sourceColumn
-      )
-      if (!source) {
-        const sourceTable = resolveTable(
-          store.schema,
-          action.params.sourceTable
-        )
-        if (!sourceTable) {
-          console.warn(
-            '[applyAction] Source table not found:',
-            action.params.sourceTable
-          )
-          break
-        }
-        const targetTable = resolveTable(
-          store.schema,
-          action.params.targetTable
-        )
-        const targetCol = targetTable?.columns.find(
-          (c) => c.id === target.columnId
-        )
-        store.addColumn(sourceTable.id, {
-          name: action.params.sourceColumn,
-          type: targetCol?.type ?? ('INTEGER' as ColumnType),
-          constraints: [
-            'FOREIGN KEY' as ColumnConstraint,
-            'NOT NULL' as ColumnConstraint,
-          ],
-        })
-        // Re-resolve after creation (must use fresh state since store.schema is stale)
-        source = resolveColumn(
-          useSchemaStore.getState().schema,
-          action.params.sourceTable,
-          action.params.sourceColumn
-        )
-        if (!source) {
-          console.warn(
-            '[applyAction] Failed to create FK column:',
-            action.params
-          )
-          break
-        }
-      } else {
-        // Column exists but may lack FOREIGN KEY constraint - add it
-        const sourceTable = resolveTable(
-          store.schema,
-          action.params.sourceTable
-        )
-        const col = sourceTable?.columns.find((c) => c.id === source!.columnId)
-        if (
-          col &&
-          !col.constraints.includes('FOREIGN KEY' as ColumnConstraint)
-        ) {
-          store.updateColumn(source.tableId, source.columnId, {
-            constraints: [
-              ...col.constraints,
-              'FOREIGN KEY' as ColumnConstraint,
-            ],
-          })
-        }
-      }
-
-      store.addRelationship({ source, target, type: action.params.type })
+    case 'addRelationship':
+      applyAddRelationship(store, action.params)
       break
-    }
+
+    case 'addMultipleRelationships':
+      for (const rel of action.params.relationships) {
+        applyAddRelationship(store, rel)
+      }
+      break
 
     case 'updateRelationship':
       store.updateRelationship(
@@ -390,6 +425,10 @@ export function applyAction(
       store.generateJunctionTable(srcTable.id, tgtTable.id)
       break
     }
+
+    case 'resetSchema':
+      store.setSchema(createEmptySchema())
+      break
 
     case 'undo':
       temporal.undo(action.params.steps)
