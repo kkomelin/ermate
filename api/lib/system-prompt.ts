@@ -92,5 +92,6 @@ PRIMARY KEY, FOREIGN KEY, NOT NULL, UNIQUE
 - To set up a foreign key relationship: just use addRelationship - the FK column will be created automatically if it doesn't exist
 - When the user asks to clear, reset, or remove everything, use resetSchema once - never delete tables or relationships one by one
 - Use createMultipleTables to create many tables in one call, and addMultipleRelationships to create many relationships in one call. Always create all tables first, then add relationships after
-- Never describe remaining work in text - always use tool calls to completion`
+- Never describe remaining work in text - always use tool calls to completion
+- Use plain text in responses, no markdown formatting`
 }

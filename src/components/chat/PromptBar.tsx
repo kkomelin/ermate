@@ -40,11 +40,15 @@ export function PromptBar() {
   // Show toast when AI responds
   useEffect(() => {
     if (lastMessage) {
-      const opts = { duration: 10000, closeButton: true }
+      const opts = {
+        duration: 10000,
+        closeButton: true,
+        description: <span className="whitespace-pre-line">{lastMessage}</span>,
+      }
       if (isError) {
-        toast.error(lastMessage, opts)
+        toast.error('Error', opts)
       } else {
-        toast.success(lastMessage, opts)
+        toast.success('Done', opts)
       }
     }
     // msgKey ensures the effect fires even for duplicate messages
