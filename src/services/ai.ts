@@ -282,23 +282,85 @@ export function applyAction(
     }
 
     case 'addRelationship': {
-      const source = resolveColumn(
-        store.schema,
-        action.params.sourceTable,
-        action.params.sourceColumn
-      )
       const target = resolveColumn(
         store.schema,
         action.params.targetTable,
         action.params.targetColumn
       )
-      if (!source || !target) {
+      if (!target) {
         console.warn(
-          '[applyAction] Could not resolve relationship:',
+          '[applyAction] Could not resolve target column:',
           action.params
         )
         break
       }
+
+      // Auto-create the FK column on the source table if it doesn't exist
+      let source = resolveColumn(
+        store.schema,
+        action.params.sourceTable,
+        action.params.sourceColumn
+      )
+      if (!source) {
+        const sourceTable = resolveTable(
+          store.schema,
+          action.params.sourceTable
+        )
+        if (!sourceTable) {
+          console.warn(
+            '[applyAction] Source table not found:',
+            action.params.sourceTable
+          )
+          break
+        }
+        const targetTable = resolveTable(
+          store.schema,
+          action.params.targetTable
+        )
+        const targetCol = targetTable?.columns.find(
+          (c) => c.id === target.columnId
+        )
+        store.addColumn(sourceTable.id, {
+          name: action.params.sourceColumn,
+          type: targetCol?.type ?? ('INTEGER' as ColumnType),
+          constraints: [
+            'FOREIGN KEY' as ColumnConstraint,
+            'NOT NULL' as ColumnConstraint,
+          ],
+        })
+        // Re-resolve after creation
+        source = resolveColumn(
+          store.schema,
+          action.params.sourceTable,
+          action.params.sourceColumn
+        )
+        if (!source) {
+          console.warn(
+            '[applyAction] Failed to create FK column:',
+            action.params
+          )
+          break
+        }
+      } else {
+        // Column exists but may lack FOREIGN KEY constraint - add it
+        const sourceTable = resolveTable(
+          store.schema,
+          action.params.sourceTable
+        )
+        const col = sourceTable?.columns.find((c) => c.id === source!.columnId)
+        if (
+          col &&
+          !col.constraints.includes('FOREIGN KEY' as ColumnConstraint)
+        ) {
+          store.updateColumn(source.tableId, source.columnId, {
+            constraints: [
+              ...col.constraints,
+              'FOREIGN KEY' as ColumnConstraint,
+            ],
+          })
+        }
+      }
+
       store.addRelationship({ source, target, type: action.params.type })
       break
     }

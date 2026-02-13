@@ -89,5 +89,5 @@ PRIMARY KEY, FOREIGN KEY, NOT NULL, UNIQUE
 - You can call multiple tools in sequence for complex operations (e.g. create table then add relationships)
 - Use undo/redo when the user wants to revert or restore changes
 - When creating tables with custom columns, do NOT include id, created_at, or updated_at - they are added automatically
-- To set up a foreign key relationship: first add a FK column to the source table, then use addRelationship to link it`
+- To set up a foreign key relationship: just use addRelationship - the FK column will be created automatically if it doesn't exist`
 }
