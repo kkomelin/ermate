@@ -80,12 +80,33 @@ interface SchemaState {
 
 type PartializedState = Pick<SchemaState, 'schema'>
 
+function getInitialState() {
+  const lastId = DalService.getLastSchemaId()
+  if (lastId) {
+    const saved = DalService.getSavedSchema(lastId)
+    if (saved) {
+      return {
+        schema: saved.schema,
+        schemaId: saved.meta.id,
+        schemaName: saved.meta.name,
+      }
+    }
+  }
+  return {
+    schema: SchemaService.createEmptySchema(),
+    schemaId: crypto.randomUUID(),
+    schemaName: DalService.nextUntitledName(),
+  }
+}
+
+const initialState = getInitialState()
+
 export const useSchemaStore = create<SchemaState>()(
   temporal(
     (set, get) => ({
-      schema: SchemaService.createEmptySchema(),
-      schemaId: crypto.randomUUID(),
-      schemaName: DalService.nextUntitledName(),
+      schema: initialState.schema,
+      schemaId: initialState.schemaId,
+      schemaName: initialState.schemaName,
       selectedTableId: null,
       selectedRelationshipId: null,
       pendingConnection: null,

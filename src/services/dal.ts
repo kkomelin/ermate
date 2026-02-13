@@ -1,6 +1,7 @@
 import type { SavedSchema, Schema, SchemaMeta } from '@/types/schema'
 
 const STORAGE_KEY = 'ermate:schemas'
+const LAST_SCHEMA_KEY = 'ermate:last-schema'
 
 export interface DalStorage {
   getItem(key: string): string | null
@@ -67,6 +68,19 @@ export function nextUntitledName(storage: DalStorage = localStorage): string {
   let n = 1
   while (used.has(`Untitled ${n}`)) n++
   return `Untitled ${n}`
+}
+
+export function getLastSchemaId(
+  storage: DalStorage = localStorage
+): string | null {
+  return storage.getItem(LAST_SCHEMA_KEY)
+}
+
+export function setLastSchemaId(
+  id: string,
+  storage: DalStorage = localStorage
+): void {
+  storage.setItem(LAST_SCHEMA_KEY, id)
 }
 
 export function deleteSchema(
