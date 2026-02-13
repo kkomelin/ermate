@@ -35,28 +35,33 @@ const TYPE_COLORS: Record<string, string> = {
 const CONSTRAINT_TOGGLES: {
   value: ColumnConstraint
   label: string
+  title: string
   activeClass: string
 }[] = [
   {
     value: CC.PRIMARY_KEY,
     label: 'PK',
+    title: 'Primary Key',
     activeClass:
       'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40',
   },
   {
     value: CC.FOREIGN_KEY,
     label: 'FK',
+    title: 'Foreign Key',
     activeClass:
       'bg-purple-500/15 text-purple-700 dark:text-purple-400 border-purple-500/40',
   },
   {
     value: CC.NOT_NULL,
     label: 'NN',
+    title: 'Not Null',
     activeClass: 'bg-muted text-foreground border-border',
   },
   {
     value: CC.UNIQUE,
     label: 'UQ',
+    title: 'Unique',
     activeClass:
       'bg-sky-500/15 text-sky-700 dark:text-sky-400 border-sky-500/40',
   },
@@ -189,11 +194,12 @@ function ColumnRowComponent({ column, onUpdate, onRemove }: ColumnRowProps) {
             <button
               key={ct.value}
               type="button"
-              aria-label={ct.value}
+              title={ct.title}
+              aria-label={ct.title}
               aria-pressed={active}
               onClick={() => toggleConstraint(ct.value)}
               className={cn(
-                'h-5 rounded-sm border px-1 font-mono text-[9px] leading-none font-semibold transition-colors',
+                'h-5 cursor-pointer rounded-sm border px-1 font-mono text-[9px] leading-none font-semibold transition-colors',
                 active
                   ? ct.activeClass
                   : 'text-muted-foreground/40 hover:border-border hover:text-muted-foreground border-transparent'
@@ -209,6 +215,7 @@ function ColumnRowComponent({ column, onUpdate, onRemove }: ColumnRowProps) {
       <Button
         variant="ghost"
         size="icon"
+        title="Delete column"
         aria-label="Delete column"
         className="text-muted-foreground/40 hover:text-destructive size-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
         onClick={() => onRemove(column.id)}

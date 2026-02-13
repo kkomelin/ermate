@@ -22,7 +22,6 @@ import {
   importFromFile,
 } from '@/services/export-import'
 import { findOpenPosition } from '@/lib/layout'
-import { ColumnConstraint, ColumnType } from '@/types/schema'
 import { useReactFlow } from '@xyflow/react'
 import {
   DownloadIcon,
@@ -34,7 +33,6 @@ import {
   Share2Icon,
   ShieldCheckIcon,
   SquarePlusIcon,
-  TableIcon,
   Undo2Icon,
   UploadIcon,
   XIcon,
@@ -44,7 +42,6 @@ import { toast } from 'sonner'
 
 export function Toolbar() {
   const addTable = useSchemaStore((s) => s.addTable)
-  const addTableWithColumns = useSchemaStore((s) => s.addTableWithColumns)
   const schemaName = useSchemaStore((s) => s.schemaName)
   const setSchemaName = useSchemaStore((s) => s.setSchemaName)
   const setSchema = useSchemaStore((s) => s.setSchema)
@@ -92,24 +89,6 @@ export function Toolbar() {
     const position = findOpenPosition(tables, getViewportCenter())
     addTable(`table_${Date.now()}`, position)
   }, [addTable, getViewportCenter])
-
-  const handleAddSampleTable = useCallback(() => {
-    const tables = useSchemaStore.getState().schema.tables
-    const position = findOpenPosition(tables, getViewportCenter())
-
-    addTableWithColumns('users', position, [
-      {
-        name: 'email',
-        type: ColumnType.VARCHAR,
-        constraints: [ColumnConstraint.NOT_NULL, ColumnConstraint.UNIQUE],
-      },
-      {
-        name: 'name',
-        type: ColumnType.VARCHAR,
-        constraints: [],
-      },
-    ])
-  }, [addTableWithColumns, getViewportCenter])
 
   async function handleShare() {
     try {
@@ -238,7 +217,7 @@ export function Toolbar() {
               <Button
                 variant="ghost"
                 size="xs"
-                className="group hover:border-border mx-1 max-w-20 gap-1.5 border border-dashed border-transparent font-semibold md:max-w-40"
+                className="group hover:border-border mx-1 max-w-24 gap-1.5 border border-dashed border-transparent font-semibold md:max-w-40"
                 onClick={startEditing}
               >
                 <span className="truncate">{schemaName}</span>
@@ -258,19 +237,7 @@ export function Toolbar() {
               <span className="hidden md:inline">Add Table</span>
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Add an empty table to the canvas</TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="xs" onClick={handleAddSampleTable}>
-              <TableIcon className="size-3.5" />
-              <span className="hidden md:inline">Sample</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            Add a sample "users" table with columns
-          </TooltipContent>
+          <TooltipContent>Add a new table to the canvas</TooltipContent>
         </Tooltip>
 
         <div className="bg-border mx-1 h-5 w-px" />

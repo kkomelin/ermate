@@ -152,7 +152,7 @@ export function TableEditor() {
   return (
     <div
       className={cn(
-        'bg-card absolute top-0 right-0 z-20 flex h-full w-[320px] flex-col border-l font-mono shadow-lg',
+        'bg-card absolute top-0 right-0 z-20 flex h-full w-[320px] flex-col border-l font-mono shadow-lg md:w-[340px] lg:w-[370px]',
         'motion-safe:animate-in motion-safe:slide-in-from-right motion-safe:duration-200'
       )}
     >
