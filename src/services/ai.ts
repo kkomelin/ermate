@@ -1,3 +1,4 @@
+import { useSchemaStore } from '@/hooks/useSchemaStore'
 import type {
   Column,
   ColumnConstraint,
@@ -328,9 +329,9 @@ export function applyAction(
             'NOT NULL' as ColumnConstraint,
           ],
         })
-        // Re-resolve after creation
+        // Re-resolve after creation (must use fresh state since store.schema is stale)
         source = resolveColumn(
-          store.schema,
+          useSchemaStore.getState().schema,
           action.params.sourceTable,
           action.params.sourceColumn
         )

@@ -21,6 +21,7 @@ import {
   downloadAsSQL,
   importFromFile,
 } from '@/services/export-import'
+import { findOpenPosition } from '@/lib/layout'
 import { ColumnConstraint, ColumnType } from '@/types/schema'
 import { useReactFlow } from '@xyflow/react'
 import {
@@ -78,41 +79,37 @@ export function Toolbar() {
     setEditing(false)
   }
 
-  const handleAddTable = useCallback(() => {
+  const getViewportCenter = useCallback(() => {
     const { x, y, zoom } = getViewport()
-    const centerX = (-x + window.innerWidth / 2) / zoom
-    const centerY = (-y + window.innerHeight / 2) / zoom
-    const offsetX = (Math.random() - 0.5) * 100
-    const offsetY = (Math.random() - 0.5) * 100
+    return {
+      x: (-x + window.innerWidth / 2) / zoom,
+      y: (-y + window.innerHeight / 2) / zoom,
+    }
+  }, [getViewport])
 
-    addTable(`table_${Date.now()}`, {
-      x: Math.round(centerX + offsetX),
-      y: Math.round(centerY + offsetY),
-    })
-  }, [addTable, getViewport])
+  const handleAddTable = useCallback(() => {
+    const tables = useSchemaStore.getState().schema.tables
+    const position = findOpenPosition(tables, getViewportCenter())
+    addTable(`table_${Date.now()}`, position)
+  }, [addTable, getViewportCenter])
 
   const handleAddSampleTable = useCallback(() => {
-    const { x, y, zoom } = getViewport()
-    const centerX = (-x + window.innerWidth / 2) / zoom
-    const centerY = (-y + window.innerHeight / 2) / zoom
+    const tables = useSchemaStore.getState().schema.tables
+    const position = findOpenPosition(tables, getViewportCenter())
 
-    addTableWithColumns(
-      'users',
-      { x: Math.round(centerX), y: Math.round(centerY) },
-      [
-        {
-          name: 'email',
-          type: ColumnType.VARCHAR,
-          constraints: [ColumnConstraint.NOT_NULL, ColumnConstraint.UNIQUE],
-        },
-        {
-          name: 'name',
-          type: ColumnType.VARCHAR,
-          constraints: [],
-        },
-      ]
-    )
-  }, [addTableWithColumns, getViewport])
+    addTableWithColumns('users', position, [
+      {
+        name: 'email',
+        type: ColumnType.VARCHAR,
+        constraints: [ColumnConstraint.NOT_NULL, ColumnConstraint.UNIQUE],
+      },
+      {
+        name: 'name',
+        type: ColumnType.VARCHAR,
+        constraints: [],
+      },
+    ])
+  }, [addTableWithColumns, getViewportCenter])
 
   async function handleShare() {
     try {

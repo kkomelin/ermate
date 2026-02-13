@@ -16,7 +16,13 @@ import {
   type OnConnect,
   type OnNodesChange,
 } from '@xyflow/react'
-import { MoonIcon, SunIcon, TablePropertiesIcon } from 'lucide-react'
+import { computeDagreLayout } from '@/lib/layout'
+import {
+  LayoutGridIcon,
+  MoonIcon,
+  SunIcon,
+  TablePropertiesIcon,
+} from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TableNode, type TableNodeData } from './TableNode'
 
@@ -254,6 +260,21 @@ export function SchemaCanvas() {
         color="var(--color-border)"
       />
       <Controls className="!border-border !bg-card [&>button]:!border-border [&>button]:!bg-card [&>button]:!text-card-foreground [&>button]:hover:!bg-muted !rounded-lg !border !shadow-md max-md:!mb-[78px]">
+        <ControlButton
+          onClick={() => {
+            const { schema: s, updateTable } = useSchemaStore.getState()
+            if (s.tables.length === 0) return
+            const positions = computeDagreLayout(s.tables, s.relationships)
+            for (const [id, pos] of positions) {
+              updateTable(id, { position: pos })
+            }
+            requestAnimationFrame(() => fitView({ padding: 0.1, maxZoom: 1 }))
+          }}
+          title="Auto-arrange layout"
+          aria-label="Auto-arrange layout"
+        >
+          <LayoutGridIcon />
+        </ControlButton>
         <ControlButton
           onClick={toggleTheme}
           title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
