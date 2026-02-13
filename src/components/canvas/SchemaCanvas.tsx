@@ -1,23 +1,24 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import {
-  ReactFlow,
-  Background,
-  BackgroundVariant,
-  Controls,
-  useReactFlow,
-  applyNodeChanges,
-  type Node,
-  type Edge,
-  type OnNodesChange,
-  type OnConnect,
-  type NodeTypes,
-} from '@xyflow/react'
-import { MoonIcon, SunIcon, TablePropertiesIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { useSchemaStore } from '@/hooks/useSchemaStore'
 import { useTheme } from '@/hooks/useTheme'
-import { TableNode, type TableNodeData } from './TableNode'
 import { RelationshipType } from '@/types/schema'
+import {
+  applyNodeChanges,
+  Background,
+  BackgroundVariant,
+  ControlButton,
+  Controls,
+  Panel,
+  ReactFlow,
+  useReactFlow,
+  type Edge,
+  type Node,
+  type NodeTypes,
+  type OnConnect,
+  type OnNodesChange,
+} from '@xyflow/react'
+import { MoonIcon, SunIcon, TablePropertiesIcon } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { TableNode, type TableNodeData } from './TableNode'
 
 const nodeTypes: NodeTypes = {
   table: TableNode,
@@ -252,27 +253,23 @@ export function SchemaCanvas() {
         size={1}
         color="var(--color-border)"
       />
-      <Controls className="!border-border !bg-card [&>button]:!border-border [&>button]:!bg-card [&>button]:!text-card-foreground [&>button]:hover:!bg-muted !rounded-lg !border !shadow-md" />
-      {/* ERMate branding + theme toggle */}
-      <div className="border-border bg-card/90 text-muted-foreground absolute right-2 bottom-2 z-10 flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-semibold tracking-tight shadow-sm backdrop-blur-sm">
-        <TablePropertiesIcon className="size-3.5" />
-        ERMate
-        <div className="bg-border mx-0.5 h-3.5 w-px" />
-        <Button
-          variant="ghost"
-          size="icon-xs"
+      <Controls className="!border-border !bg-card [&>button]:!border-border [&>button]:!bg-card [&>button]:!text-card-foreground [&>button]:hover:!bg-muted !rounded-lg !border !shadow-md max-md:!mb-[78px]">
+        <ControlButton
           onClick={toggleTheme}
           title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
           aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-          className="text-muted-foreground hover:text-foreground size-5"
         >
-          {theme === 'dark' ? (
-            <SunIcon className="size-3.5" />
-          ) : (
-            <MoonIcon className="size-3.5" />
-          )}
-        </Button>
-      </div>
+          {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+        </ControlButton>
+      </Controls>
+      {/* ERMate branding */}
+      <Panel
+        position="bottom-right"
+        className="border-border bg-card/90 text-muted-foreground hidden items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-semibold tracking-tight opacity-60 shadow-sm backdrop-blur-sm lg:flex"
+      >
+        <TablePropertiesIcon className="size-3.5" />
+        ERMate
+      </Panel>
     </ReactFlow>
   )
 }

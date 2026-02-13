@@ -1,20 +1,20 @@
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { useSchemaPrompt } from '@/hooks/useSchemaPrompt'
+import { useSchemaStore } from '@/hooks/useSchemaStore'
+import { SignInButton, useUser } from '@clerk/clerk-react'
+import { LoaderIcon, SendIcon, SparklesIcon, WifiOffIcon } from 'lucide-react'
+import {
   useCallback,
   useEffect,
   useRef,
   useState,
   useSyncExternalStore,
 } from 'react'
-import { LoaderIcon, SendIcon, SparklesIcon, WifiOffIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { useSchemaPrompt } from '@/hooks/useSchemaPrompt'
-import { useSchemaStore } from '@/hooks/useSchemaStore'
-import { SignInButton, useUser } from '@clerk/clerk-react'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 function subscribeOnline(cb: () => void) {
   window.addEventListener('online', cb)
@@ -82,7 +82,7 @@ export function PromptBar() {
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 flex justify-center px-4">
-      <div className="border-border bg-card/95 pointer-events-auto flex w-full max-w-[600px] items-center gap-2 rounded-lg border p-2 shadow-lg backdrop-blur-sm transition-shadow focus-within:shadow-xl">
+      <div className="border-border bg-card/95 pointer-events-auto flex w-full items-center gap-2 rounded-lg border p-2 shadow-lg backdrop-blur-sm transition-all duration-300 focus-within:shadow-xl md:max-w-[600px]">
         {/* AI indicator */}
         <div className="text-muted-foreground flex shrink-0 items-center pl-0.5">
           {!isOnline ? (
