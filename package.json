@@ -94,10 +94,5 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,css,html}": "prettier --write"
-  },
-  "pnpm": {
-    "overrides": {
-      "vite": "^8.0.0-beta.14"
-    }
   }
 }
