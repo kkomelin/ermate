@@ -34,6 +34,15 @@ export default defineConfig({
             purpose: 'maskable',
           },
         ],
+        screenshots: [
+          {
+            src: '/screenshot.png',
+            sizes: '2048x1200',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: 'ERMate main interface showing database schema designer',
+          },
+        ],
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
