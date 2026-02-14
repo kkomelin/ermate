@@ -11,6 +11,7 @@ import {
   addMultipleRelationships,
   updateRelationship,
   deleteRelationship,
+  deleteAllRelationships,
   generateJunctionTable,
 } from './relationships.js'
 import { resetSchema } from './canvas.js'
@@ -29,6 +30,7 @@ export const tools = {
   addMultipleRelationships,
   updateRelationship,
   deleteRelationship,
+  deleteAllRelationships,
   generateJunctionTable,
   resetSchema,
   undo,

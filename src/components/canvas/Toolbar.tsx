@@ -1,3 +1,4 @@
+import { ImportSqlDialog } from '@/components/panels/ImportSqlDialog'
 import { LoadDialog } from '@/components/panels/LoadDialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -20,8 +21,10 @@ import { findOpenPosition } from '@/lib/layout'
 import {
   downloadAsJSON,
   downloadAsSQL,
-  importFromFile,
+  importFromJSON,
+  importFromSQL,
 } from '@/services/export-import'
+import type { SQLDialect } from '@/services/sql-parser'
 import { useReactFlow } from '@xyflow/react'
 import {
   DownloadIcon,
@@ -46,7 +49,7 @@ export function Toolbar() {
   const setSchemaName = useSchemaStore((s) => s.setSchemaName)
   const setSchema = useSchemaStore((s) => s.setSchema)
   const newSchema = useSchemaStore((s) => s.newSchema)
-  const { getViewport } = useReactFlow()
+  const { getViewport, fitView } = useReactFlow()
   const { copyShareUrl } = useShareUrl()
   const pastStates = useTemporalStore((s) => s.pastStates)
   const futureStates = useTemporalStore((s) => s.futureStates)
@@ -57,10 +60,13 @@ export function Toolbar() {
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [loadOpen, setLoadOpen] = useState(false)
+  const [importSqlOpen, setImportSqlOpen] = useState(false)
+  const [pendingSqlFile, setPendingSqlFile] = useState<File | null>(null)
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState('')
   const nameInputRef = useRef<HTMLInputElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const jsonFileInputRef = useRef<HTMLInputElement>(null)
+  const sqlFileInputRef = useRef<HTMLInputElement>(null)
 
   function startEditing() {
     setEditValue(schemaName)
@@ -111,18 +117,45 @@ export function Toolbar() {
     downloadAsSQL(schema, filename)
   }
 
-  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImportJSON(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     try {
-      const imported = await importFromFile(file)
+      const imported = await importFromJSON(file)
       useSchemaStore.getState().newSchema()
       setSchema(imported)
+      requestAnimationFrame(() => fitView({ padding: 0.1, maxZoom: 1 }))
       toast.success(`Imported "${file.name}"`)
     } catch {
       toast.error('Invalid schema file')
     }
     e.target.value = ''
+  }
+
+  function handleImportSQLClick() {
+    sqlFileInputRef.current?.click()
+  }
+
+  function handleSqlFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPendingSqlFile(file)
+    setImportSqlOpen(true)
+    e.target.value = ''
+  }
+
+  async function handleImportSqlConfirm(dialect: SQLDialect) {
+    if (!pendingSqlFile) return
+    try {
+      const imported = await importFromSQL(pendingSqlFile, dialect)
+      useSchemaStore.getState().newSchema()
+      setSchema(imported)
+      requestAnimationFrame(() => fitView({ padding: 0.1, maxZoom: 1 }))
+      toast.success(`Imported "${pendingSqlFile.name}"`)
+    } catch {
+      toast.error('Invalid schema file')
+    }
+    setPendingSqlFile(null)
   }
 
   return (
@@ -172,9 +205,13 @@ export function Toolbar() {
               <DownloadIcon className="size-3.5" />
               Export SQL
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+            <DropdownMenuItem onClick={() => jsonFileInputRef.current?.click()}>
               <UploadIcon className="size-3.5" />
-              Import
+              Import from JSON
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleImportSQLClick}>
+              <UploadIcon className="size-3.5" />
+              Import from SQL
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleShare}>
               <Share2Icon className="size-3.5" />
@@ -184,12 +221,20 @@ export function Toolbar() {
         </DropdownMenu>
 
         <input
-          ref={fileInputRef}
+          ref={jsonFileInputRef}
           type="file"
           accept=".json"
-          aria-label="Import schema file"
+          aria-label="Import schema from JSON"
           className="hidden"
-          onChange={handleImport}
+          onChange={handleImportJSON}
+        />
+        <input
+          ref={sqlFileInputRef}
+          type="file"
+          accept=".sql"
+          aria-label="Import schema from SQL"
+          className="hidden"
+          onChange={handleSqlFileSelected}
         />
       </div>
 
@@ -310,6 +355,15 @@ export function Toolbar() {
       </div>
 
       <LoadDialog open={loadOpen} onOpenChange={setLoadOpen} />
+      <ImportSqlDialog
+        open={importSqlOpen}
+        onOpenChange={(open) => {
+          setImportSqlOpen(open)
+          if (!open) setPendingSqlFile(null)
+        }}
+        fileName={pendingSqlFile?.name ?? ''}
+        onConfirm={handleImportSqlConfirm}
+      />
     </>
   )
 }

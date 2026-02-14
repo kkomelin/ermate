@@ -1,5 +1,6 @@
 import type { Schema, Table } from '@/types/schema'
 import { ColumnConstraint, ColumnType } from '@/types/schema'
+import { fromSQL, type SQLDialect } from './sql-parser'
 
 // ---------------------------------------------------------------------------
 // JSON
@@ -122,7 +123,15 @@ export function downloadAsSQL(schema: Schema, filename?: string): void {
   URL.revokeObjectURL(url)
 }
 
-export async function importFromFile(file: File): Promise<Schema> {
+export async function importFromJSON(file: File): Promise<Schema> {
   const text = await file.text()
   return fromJSON(text)
+}
+
+export async function importFromSQL(
+  file: File,
+  dialect?: SQLDialect
+): Promise<Schema> {
+  const text = await file.text()
+  return fromSQL(text, dialect)
 }

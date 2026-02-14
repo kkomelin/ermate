@@ -117,6 +117,11 @@ export type AiAction =
       message: string
     }
   | {
+      action: 'deleteAllRelationships'
+      params: Record<string, never>
+      message: string
+    }
+  | {
       action: 'generateJunctionTable'
       params: { sourceTable: string; targetTable: string }
       message: string
@@ -172,6 +177,7 @@ interface SchemaStore {
     updates: Partial<{ type: RelationshipType }>
   ) => void
   removeRelationship: (relId: string) => void
+  removeAllRelationships: () => void
   generateJunctionTable: (sourceTableId: string, targetTableId: string) => void
 }
 
@@ -410,6 +416,10 @@ export function applyAction(
 
     case 'deleteRelationship':
       store.removeRelationship(action.params.relationshipId)
+      break
+
+    case 'deleteAllRelationships':
+      store.removeAllRelationships()
       break
 
     case 'generateJunctionTable': {

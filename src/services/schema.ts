@@ -260,6 +260,13 @@ export function removeRelationship(schema: Schema, relId: string): Schema {
   }
 }
 
+export function removeAllRelationships(schema: Schema): Schema {
+  return {
+    ...schema,
+    relationships: [],
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Validation
 // ---------------------------------------------------------------------------

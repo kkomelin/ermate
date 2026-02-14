@@ -63,6 +63,7 @@ interface SchemaState {
     updates: Partial<Pick<Relationship, 'type' | 'source' | 'target'>>
   ) => void
   removeRelationship: (relId: string) => void
+  removeAllRelationships: () => void
   generateJunctionTable: (sourceTableId: string, targetTableId: string) => void
 
   // Pending connection
@@ -213,6 +214,11 @@ export const useSchemaStore = create<SchemaState>()(
             s.selectedRelationshipId === relId
               ? null
               : s.selectedRelationshipId,
+        })),
+      removeAllRelationships: () =>
+        set((s) => ({
+          schema: SchemaService.removeAllRelationships(s.schema),
+          selectedRelationshipId: null,
         })),
       generateJunctionTable: (sourceTableId, targetTableId) =>
         set((s) => ({

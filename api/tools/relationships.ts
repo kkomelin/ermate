@@ -101,3 +101,13 @@ export const generateJunctionTable = tool({
     message: `Created junction table for ${sourceTable} and ${targetTable}`,
   }),
 })
+
+export const deleteAllRelationships = tool({
+  description: 'Remove all relationships from the schema.',
+  inputSchema: z.object({}),
+  execute: async () => ({
+    action: 'deleteAllRelationships' as const,
+    params: {},
+    message: 'Deleted all relationships',
+  }),
+})

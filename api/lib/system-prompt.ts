@@ -90,7 +90,9 @@ PRIMARY KEY, FOREIGN KEY, NOT NULL, UNIQUE
 - Use undo/redo when the user wants to revert or restore changes
 - When creating tables with custom columns, do NOT include id, created_at, or updated_at - they are added automatically
 - To set up a foreign key relationship: just use addRelationship - the FK column will be created automatically if it doesn't exist
-- When the user asks to clear, reset, or remove everything, use resetSchema once - never delete tables or relationships one by one
+- When the user asks to clear, reset, delete, or remove everything, use resetSchema once - never delete tables or relationships one by one
+- When the user asks to clear, reset, delete, or remove all tables, use resetSchema once
+- When the user asks to clear, reset, delete, or remove all relationships (but keep tables), use deleteAllRelationships once - never delete relationships one by one
 - Use createMultipleTables to create many tables in one call, and addMultipleRelationships to create many relationships in one call. Always create all tables first, then add relationships after
 - Never describe remaining work in text - always use tool calls to completion
 - Use plain text in responses, no markdown formatting`
