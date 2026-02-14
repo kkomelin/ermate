@@ -19,17 +19,13 @@
     "entity-relationship",
     "database",
     "schema",
-    "designer",
-    "visual",
     "ai",
-    "typescript",
-    "react",
     "pwa",
-    "offline",
     "sql",
     "postgres",
     "mysql",
-    "sqlite"
+    "sqlite",
+    "ermate"
   ],
   "scripts": {
     "dev": "vite --open",
