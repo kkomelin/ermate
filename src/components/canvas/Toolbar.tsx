@@ -7,6 +7,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
@@ -203,22 +206,39 @@ export function Toolbar() {
               <FolderOpenIcon className="size-3.5" />
               Load
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleExportJSON}>
-              <DownloadIcon className="size-3.5" />
-              Export JSON
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleExportSQL}>
-              <DownloadIcon className="size-3.5" />
-              Export SQL
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => jsonFileInputRef.current?.click()}>
-              <UploadIcon className="size-3.5" />
-              Import from JSON
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleImportSQLClick}>
-              <UploadIcon className="size-3.5" />
-              Import from SQL
-            </DropdownMenuItem>
+
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <DownloadIcon className="size-3.5" />
+                Export
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem onClick={handleExportJSON}>
+                  JSON
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportSQL}>
+                  SQL
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <UploadIcon className="size-3.5" />
+                Import
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem
+                  onClick={() => jsonFileInputRef.current?.click()}
+                >
+                  JSON
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleImportSQLClick}>
+                  SQL
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+
             <DropdownMenuItem onClick={handleShare}>
               <Share2Icon className="size-3.5" />
               Share
