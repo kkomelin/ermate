@@ -52,6 +52,7 @@ function getColumnName(col: {
     const ex =
       (c as { expr?: { column?: string; value?: string }; value?: string })
         .expr ?? (c as { value?: string })
+    // @ts-expect-error - type narrowing issue with union types
     if (ex && typeof ex.column === 'string') return ex.column
     if (ex && typeof ex === 'object' && 'value' in ex)
       return String((ex as { value?: string }).value ?? '')
