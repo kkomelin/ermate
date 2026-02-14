@@ -1,12 +1,12 @@
 [![Tests](https://github.com/kkomelin/ermate/actions/workflows/test.yml/badge.svg)](https://github.com/kkomelin/ermate/actions/workflows/test.yml)
-[![Deployment Status](https://img.shields.io/badge/deployment-live-brightgreen)](https://ermate.vercel.app)
+[![Deployment Status](https://img.shields.io/badge/deployment-live-brightgreen)](https://ermate.app)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 # ERMate - AI-powered Visual Database Schema Designer
 
 Design ER diagrams, define tables and relationships manually or via prompts, and share via URL - no backend required.
 
-**[🚀 Try it live](https://ermate.vercel.app)**
+**[🚀 Try it live](https://ermate.app)**
 
 ## Features
 
