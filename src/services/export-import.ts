@@ -30,18 +30,43 @@ export function fromJSON(json: string): Schema {
 // SQL DDL
 // ---------------------------------------------------------------------------
 
-function sqlType(type: ColumnType): string {
+function varcharType(): string {
+  return 'VARCHAR(255)'
+}
+
+function integerType(dialect?: SQLDialect): string {
+  if (dialect === 'MySQL') return 'INT'
+  return 'INTEGER'
+}
+
+function booleanType(dialect?: SQLDialect): string {
+  if (dialect === 'MySQL') return 'TINYINT(1)'
+  if (dialect === 'SQLite') return 'BOOLEAN'
+  return 'BOOLEAN'
+}
+
+function textType(): string {
+  return 'TEXT'
+}
+
+function timestampType(dialect?: SQLDialect): string {
+  if (dialect === 'MySQL') return 'DATETIME'
+  if (dialect === 'SQLite') return 'TEXT'
+  return 'TIMESTAMP'
+}
+
+function sqlType(type: ColumnType, dialect?: SQLDialect): string {
   switch (type) {
     case ColumnType.VARCHAR:
-      return 'VARCHAR(255)'
+      return varcharType()
     case ColumnType.INTEGER:
-      return 'INTEGER'
+      return integerType(dialect)
     case ColumnType.BOOLEAN:
-      return 'BOOLEAN'
+      return booleanType(dialect)
     case ColumnType.TEXT:
-      return 'TEXT'
+      return textType()
     case ColumnType.TIMESTAMP:
-      return 'TIMESTAMP'
+      return timestampType(dialect)
     default:
       return type
   }
@@ -56,23 +81,31 @@ function sqlConstraints(constraints: ColumnConstraint[]): string {
   return parts.join(' ')
 }
 
-function tableToSQL(table: Table): string {
+function quoteIdentifier(name: string, dialect?: SQLDialect): string {
+  if (dialect === 'MySQL') return `\`${name}\``
+  return `"${name}"`
+}
+
+function tableToSQL(table: Table, dialect?: SQLDialect): string {
   const lines = table.columns.map((col) => {
-    const parts = [`  "${col.name}"`, sqlType(col.type)]
+    const parts = [
+      `  ${quoteIdentifier(col.name, dialect)}`,
+      sqlType(col.type, dialect),
+    ]
     const cons = sqlConstraints(col.constraints)
     if (cons) parts.push(cons)
     return parts.join(' ')
   })
 
-  return `CREATE TABLE "${table.name}" (\n${lines.join(',\n')}\n);`
+  return `CREATE TABLE ${quoteIdentifier(table.name, dialect)} (\n${lines.join(',\n')}\n);`
 }
 
-export function toSQL(schema: Schema): string {
+export function toSQL(schema: Schema, dialect?: SQLDialect): string {
   const statements: string[] = []
 
   // CREATE TABLE statements
   for (const table of schema.tables) {
-    statements.push(tableToSQL(table))
+    statements.push(tableToSQL(table, dialect))
   }
 
   // ALTER TABLE for foreign keys
@@ -87,9 +120,18 @@ export function toSQL(schema: Schema): string {
     )
 
     if (sourceTable && targetTable && sourceCol && targetCol) {
+      const sourceName = quoteIdentifier(sourceTable.name, dialect)
+      const sourceColName = quoteIdentifier(sourceCol.name, dialect)
+      const targetName = quoteIdentifier(targetTable.name, dialect)
+      const targetColName = quoteIdentifier(targetCol.name, dialect)
+      const constraintName =
+        dialect === 'MySQL'
+          ? `fk_${sourceTable.name}_${sourceCol.name}`
+          : `"fk_${sourceTable.name}_${sourceCol.name}"`
+
       statements.push(
-        `ALTER TABLE "${sourceTable.name}" ADD CONSTRAINT "fk_${sourceTable.name}_${sourceCol.name}" ` +
-          `FOREIGN KEY ("${sourceCol.name}") REFERENCES "${targetTable.name}" ("${targetCol.name}");`
+        `ALTER TABLE ${sourceName} ADD CONSTRAINT ${constraintName} ` +
+          `FOREIGN KEY (${sourceColName}) REFERENCES ${targetName} (${targetColName});`
       )
     }
   }
@@ -112,8 +154,12 @@ export function downloadAsJSON(schema: Schema, filename?: string): void {
   URL.revokeObjectURL(url)
 }
 
-export function downloadAsSQL(schema: Schema, filename?: string): void {
-  const sql = toSQL(schema)
+export function downloadAsSQL(
+  schema: Schema,
+  filename?: string,
+  dialect?: SQLDialect
+): void {
+  const sql = toSQL(schema, dialect)
   const blob = new Blob([sql], { type: 'text/sql' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')

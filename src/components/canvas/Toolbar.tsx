@@ -1,3 +1,4 @@
+import { ExportSqlDialog } from '@/components/panels/ExportSqlDialog'
 import { ImportSqlDialog } from '@/components/panels/ImportSqlDialog'
 import { LoadDialog } from '@/components/panels/LoadDialog'
 import { Badge } from '@/components/ui/badge'
@@ -61,6 +62,7 @@ export function Toolbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [loadOpen, setLoadOpen] = useState(false)
   const [importSqlOpen, setImportSqlOpen] = useState(false)
+  const [exportSqlOpen, setExportSqlOpen] = useState(false)
   const [pendingSqlFile, setPendingSqlFile] = useState<File | null>(null)
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState('')
@@ -112,9 +114,13 @@ export function Toolbar() {
   }
 
   function handleExportSQL() {
+    setExportSqlOpen(true)
+  }
+
+  function handleExportSqlConfirm(dialect: SQLDialect) {
     const { schema, schemaName: name } = useSchemaStore.getState()
     const filename = name ? `${name}.sql` : undefined
-    downloadAsSQL(schema, filename)
+    downloadAsSQL(schema, filename, dialect)
   }
 
   async function handleImportJSON(e: React.ChangeEvent<HTMLInputElement>) {
@@ -363,6 +369,11 @@ export function Toolbar() {
         }}
         fileName={pendingSqlFile?.name ?? ''}
         onConfirm={handleImportSqlConfirm}
+      />
+      <ExportSqlDialog
+        open={exportSqlOpen}
+        onOpenChange={setExportSqlOpen}
+        onConfirm={handleExportSqlConfirm}
       />
     </>
   )
