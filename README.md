@@ -6,6 +6,8 @@
 
 Design ER diagrams, define tables and relationships manually or via prompts, and share via URL.
 
+<img width="2048" height="1200" alt="ermate-app" src="https://github.com/user-attachments/assets/76e8ad3e-75da-4ca7-8a20-6a4d4c87ff1e" />
+
 **[🚀 Try it live](https://ermate.app)**
 
 ## Features
