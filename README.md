@@ -14,10 +14,13 @@ Design ER diagrams, define tables and relationships, and share via URL - no back
 - **Tables & columns** - create tables with default columns (id, created_at, updated_at); add columns with types (VARCHAR, INTEGER, BOOLEAN, TEXT, TIMESTAMP) and constraints (PRIMARY KEY, NOT NULL, UNIQUE)
 - **Relationships** - connect columns visually to define one-to-one, one-to-many, and many-to-many relationships
 - **Junction tables** - auto-generate junction tables with foreign keys for many-to-many relationships
-- **Export** - download schemas as JSON or generate SQL DDL (CREATE TABLE + ALTER TABLE with foreign keys)
-- **Import** - load schemas from previously exported JSON files
+- **AI-powered design** - create tables, columns, and relationships using natural language; includes batch operations, smart auto-layout, and LLM safety features
+- **SQL export/import** - export schemas as SQL DDL or import from SQL dumps with dialect selection (PostgreSQL, MySQL, SQLite)
+- **JSON export/import** - download or load schemas as JSON files for backup and transfer
+- **Load schemas** - open previously saved schemas from local storage
 - **Share via URL** - generate compressed shareable links with the full schema embedded in the URL hash
 - **Auto-save** - changes are automatically saved to localStorage after 1 second of inactivity
+- **Restore on startup** - automatically loads the last opened schema when you return
 - **Undo/redo** - full undo history for schema changes (Ctrl+Z / Ctrl+Shift+Z)
 - **Validation** - validate schemas for errors and warnings
 - **Dark mode** - toggle between light and dark themes, persisted across sessions
