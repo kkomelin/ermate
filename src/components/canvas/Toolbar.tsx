@@ -204,7 +204,7 @@ export function Toolbar() {
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setLoadOpen(true)}>
               <FolderOpenIcon className="size-3.5" />
-              Load
+              Recent
             </DropdownMenuItem>
 
             <DropdownMenuSub>

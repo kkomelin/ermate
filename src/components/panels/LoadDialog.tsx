@@ -70,7 +70,7 @@ export function LoadDialog({ open, onOpenChange }: LoadDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Load Schema</DialogTitle>
+          <DialogTitle>Recent Schemas</DialogTitle>
           <DialogDescription>
             Open a previously saved schema or start fresh.
           </DialogDescription>
