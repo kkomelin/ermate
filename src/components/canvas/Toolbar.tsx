@@ -16,12 +16,12 @@ import { useLogBarStore } from '@/hooks/useLogBarStore'
 import { useSchemaStore, useTemporalStore } from '@/hooks/useSchemaStore'
 import { useShareUrl } from '@/hooks/useShareUrl'
 import { useValidation } from '@/hooks/useValidation'
+import { findOpenPosition } from '@/lib/layout'
 import {
   downloadAsJSON,
   downloadAsSQL,
   importFromFile,
 } from '@/services/export-import'
-import { findOpenPosition } from '@/lib/layout'
 import { useReactFlow } from '@xyflow/react'
 import {
   DownloadIcon,
@@ -150,7 +150,7 @@ export function Toolbar() {
             </TooltipTrigger>
             <TooltipContent>Menu</TooltipContent>
           </Tooltip>
-          <DropdownMenuContent align="start">
+          <DropdownMenuContent align="start" className="mt-1">
             <DropdownMenuItem
               onClick={() => {
                 newSchema()
