@@ -1,8 +1,36 @@
 {
   "name": "ermate",
-  "private": true,
   "version": "0.0.0",
   "type": "module",
+  "description": "AI-powered Visual Database Schema Designer - Design ER diagrams, define tables and relationships manually or via prompts, and share via URL",
+  "author": "Konstantin Komelin <konstantin.komelin@gmail.com>",
+  "license": "Apache-2.0",
+  "homepage": "https://ermate.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kkomelin/ermate",
+    "directory": ""
+  },
+  "bugs": {
+    "url": "https://github.com/kkomelin/ermate/issues"
+  },
+  "keywords": [
+    "er-diagram",
+    "entity-relationship",
+    "database",
+    "schema",
+    "designer",
+    "visual",
+    "ai",
+    "typescript",
+    "react",
+    "pwa",
+    "offline",
+    "sql",
+    "postgres",
+    "mysql",
+    "sqlite"
+  ],
   "scripts": {
     "dev": "vite --open",
     "dev:api": "tsx watch --env-file=.env.local api/dev.ts",
