@@ -4,7 +4,7 @@
 
 # ERMate - AI-powered Visual Database Schema Designer
 
-Design ER diagrams, define tables and relationships manually or via prompts, and share via URL - no backend required.
+Design ER diagrams, define tables and relationships manually or via prompts, and share via URL.
 
 **[🚀 Try it live](https://ermate.app)**
 
@@ -30,7 +30,10 @@ Design ER diagrams, define tables and relationships manually or via prompts, and
 
 - [React](https://react.dev/) 19 + [TypeScript](https://www.typescriptlang.org/) 5.9
 - [Vite](https://vite.dev/) 8 (build tool)
+- [Hono](https://hono.dev/) + [AI SDK](https://sdk.vercel.ai/) for AI-powered schema design API
+- [node-sql-parser](https://github.com/taozhi8833998/node-sql-parser) for SQL parsing
 - [React Flow](https://reactflow.dev/) (@xyflow/react) for the interactive canvas
+- [Dagre](https://github.com/dagrejs/dagre) for auto-layout
 - [Zustand](https://zustand.docs.pmnd.rs/) + [Zundo](https://github.com/charkour/zundo) for state management and undo/redo
 - [Tailwind CSS](https://tailwindcss.com/) 4 + [shadcn/ui](https://ui.shadcn.com/) + [Radix UI](https://www.radix-ui.com/) for styling and components
 - [Lucide](https://lucide.dev/) for icons
@@ -50,6 +53,7 @@ pnpm dev
 | Command | Description |
 |---------|-------------|
 | `pnpm dev` | Start dev server |
+| `pnpm dev:api` | Start AI API server (requires API keys; see `.env.sample`) |
 | `pnpm build` | Type-check and build for production |
 | `pnpm preview` | Preview production build locally |
 | `pnpm test` | Run tests |
@@ -57,12 +61,14 @@ pnpm dev
 | `pnpm lint` | Lint with ESLint |
 | `pnpm format` | Format with Prettier |
 | `pnpm typecheck` | Type-check without emitting |
+| `pnpm check` | Run typecheck, lint, and tests |
 
 ## Data Storage
 
-All data lives in the browser - no server, no database.
+The app includes an AI API (Hono + AI SDK) for natural language schema generation, but has no backend database. All schema data lives in the browser.
 
 - **Schemas** are stored in `localStorage` under the key `ermate:schemas`
+- **Active schema ID** is stored under `ermate:activeSchemaId`
 - **Theme preference** is stored under `ermate:theme`
 - **Shared schemas** are encoded in the URL hash (`#schema=...`) using LZ-String compression
 - **PWA cache** is managed by Workbox for offline access
