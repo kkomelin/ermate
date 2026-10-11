@@ -1,4 +1,4 @@
-onlyBuiltDependencies:
-  - '@clerk/shared'
-  - esbuild
-  - msw
+allowBuilds:
+  '@clerk/shared': true
+  esbuild: true
+  msw: true
