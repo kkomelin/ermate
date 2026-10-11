@@ -41,8 +41,7 @@ function getTableFullName(createTable: Create): string | null {
 
 function getColumnName(col: {
   column?:
-    | string
-    | { expr?: { column?: string; value?: string }; value?: string }
+    string | { expr?: { column?: string; value?: string }; value?: string }
   table?: string | null
 }): string {
   if (!col) return ''

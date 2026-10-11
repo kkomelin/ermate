@@ -18,7 +18,7 @@ export function useDebouncedValue(
   // Local state needed to decouple typing from debounced store commits
   useEffect(() => {
     if (!isEditingRef.current) {
-      setLocal(storeValue) // eslint-disable-line react-hooks/set-state-in-effect
+      setLocal(storeValue)
     }
   }, [storeValue])
 

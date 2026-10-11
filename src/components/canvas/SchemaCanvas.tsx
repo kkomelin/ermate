@@ -108,6 +108,7 @@ export function SchemaCanvas() {
   // Sync nodes when tables are added/removed/updated (but not on selection change)
   // React Flow requires local node state; syncing from store is the standard pattern
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNodes((currentNodes) => {
       // Create a map of current nodes by id
       const nodeMap = new Map(currentNodes.map((n) => [n.id, n]))
