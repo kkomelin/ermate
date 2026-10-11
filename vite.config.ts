@@ -68,8 +68,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@api': path.resolve(__dirname, './api'),
+      '@': path.resolve(import.meta.dirname, './src'),
+      '@api': path.resolve(import.meta.dirname, './api'),
     },
   },
 })
