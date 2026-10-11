@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Updated runtime dependencies: react and react-dom 19.3 (with @types/react and @types/react-dom 19.3), @xyflow/react 12.12, radix-ui 1.7, zod 4.6, hono 4.13, @clerk/react 6.17, @clerk/hono 0.1.88, sonner 2.0.8, zustand 5.0.15, tailwind-merge 3.7.
 - Updated build, lint and format tooling: vite 8.3 (no longer pinned to an exact version), @vitejs/plugin-react 6.1, tailwindcss 4.3, eslint 10.12, typescript-eslint 8.71, eslint-plugin-react-hooks 7.1, eslint-plugin-react-refresh 0.5.7, globals 17.13, prettier 3.9, prettier-plugin-tailwindcss 0.8, shadcn 4.21, tsx 4.23.
 - Updated dev tooling to new major versions: vitest 5, vite-plugin-pwa 2 (supports Vite 8, no more peer warning), lint-staged 17, @hono/node-server 2, and @types/node 24 to match the Node 24 used locally and in CI.
+- Updated lucide-react to 1.55. Icons are now hidden from screen readers by default (`aria-hidden`), and the icon buttons keep their labels.
 - Updated @dagrejs/dagre to 3.1, which ships its own types, and removed the unused `@types/dagre`.
 - Refreshed browserslist data (caniuse-lite).
 - Vite config uses `import.meta.dirname` instead of `__dirname`.
