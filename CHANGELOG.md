@@ -10,11 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- Updated runtime dependencies: sonner 2.0.8, zustand 5.0.15, tailwind-merge 3.7.
+- Updated runtime dependencies: react and react-dom 19.3 (with @types/react and @types/react-dom 19.3), @xyflow/react 12.12, radix-ui 1.7, zod 4.6, hono 4.13, @clerk/react 6.17, @clerk/hono 0.1.88, sonner 2.0.8, zustand 5.0.15, tailwind-merge 3.7.
 - Updated build, lint and format tooling: vite 8.3 (no longer pinned to an exact version), @vitejs/plugin-react 6.1, tailwindcss 4.3, eslint 10.12, typescript-eslint 8.71, eslint-plugin-react-hooks 7.1, eslint-plugin-react-refresh 0.5.7, globals 17.13, prettier 3.9, prettier-plugin-tailwindcss 0.8, shadcn 4.21, tsx 4.23.
 - Refreshed browserslist data (caniuse-lite).
 - Vite config uses `import.meta.dirname` instead of `__dirname`.
 - Migrated `onlyBuiltDependencies` to `allowBuilds` in `pnpm-workspace.yaml`.
+- Removed `@clerk/shared` from `allowBuilds`, since Clerk no longer runs an install script.
 - Updated TypeScript to 6.0, kept on 6.0.x (`~6.0.3`) so updates don't pull in TypeScript 7.
 - Removed the `baseUrl` option, deprecated in TypeScript 6, from the tsconfig files. `paths` already resolve relative to each tsconfig, so imports are unchanged.
 - CI uses pnpm 12, the same major as local development (was pnpm 10, which ignored `allowBuilds`), and updated actions: actions/checkout v7, pnpm/action-setup v6, actions/setup-node v7.

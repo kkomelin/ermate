@@ -1,5 +1,4 @@
 allowBuilds:
-  '@clerk/shared': true
   esbuild: true
   msw: true
 
