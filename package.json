@@ -34,7 +34,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write 'src/**/*.{ts,tsx,js,jsx,css,html}'",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "pnpm typecheck && pnpm lint && pnpm test",

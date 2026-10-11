@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Migrated `onlyBuiltDependencies` to `allowBuilds` in `pnpm-workspace.yaml`.
 - CI uses pnpm 12, the same major as local development (was pnpm 10, which ignored `allowBuilds`), and updated actions: actions/checkout v7, pnpm/action-setup v6, actions/setup-node v7.
 
+### Fixed
+
+- `pnpm typecheck` checks the app, node and api TypeScript projects. It ran `tsc --noEmit` against the root solution config, which checked 0 files.
+
 ### Security
 
 - pnpm only installs package versions published at least 1 day ago (`minimumReleaseAge: 1440`). With pnpm 12, CI also checks every lockfile entry against it.
