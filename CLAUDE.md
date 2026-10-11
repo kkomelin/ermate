@@ -8,3 +8,4 @@
 6. Use `lucide-react` for icons.
 7. Avoid using `—` or similar ai-slop in texts.
 8. Use `pnpm typecheck` for type checking.
+9. Update the `CHANGELOG.md` file if you make meaningful changes.
