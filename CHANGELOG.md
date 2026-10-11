@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Refreshed browserslist data (caniuse-lite).
 - Vite config uses `import.meta.dirname` instead of `__dirname`.
 - Migrated `onlyBuiltDependencies` to `allowBuilds` in `pnpm-workspace.yaml`.
+- Updated TypeScript to 6.0, kept on 6.0.x (`~6.0.3`) so updates don't pull in TypeScript 7.
+- Removed the `baseUrl` option, deprecated in TypeScript 6, from the tsconfig files. `paths` already resolve relative to each tsconfig, so imports are unchanged.
 - CI uses pnpm 12, the same major as local development (was pnpm 10, which ignored `allowBuilds`), and updated actions: actions/checkout v7, pnpm/action-setup v6, actions/setup-node v7.
 
 ### Fixed
