@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { generateText, stepCountIs } from 'ai'
+import { generateText, isStepCount } from 'ai'
 import { getAuth } from '@clerk/hono'
 import { tools } from '../tools/index.js'
 import { buildSystemPrompt } from '../lib/system-prompt.js'
@@ -41,10 +41,10 @@ chat.post('/', async (c) => {
     )
     const result = await generateText({
       model: 'deepseek/deepseek-v3.2',
-      system: systemPrompt,
+      instructions: systemPrompt,
       prompt,
       tools,
-      stopWhen: stepCountIs(10),
+      stopWhen: isStepCount(10),
     })
 
     // Each step may contain tool results; collect all action descriptors
