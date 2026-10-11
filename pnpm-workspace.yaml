@@ -2,3 +2,7 @@ allowBuilds:
   '@clerk/shared': true
   esbuild: true
   msw: true
+
+# Supply-chain cooldown: only install versions published at least 1 day (1440 minutes) ago.
+# pnpm 11.3+ also checks existing lockfile entries against it on install.
+minimumReleaseAge: 1440

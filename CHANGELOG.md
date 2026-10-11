@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Refreshed browserslist data (caniuse-lite).
 - Vite config uses `import.meta.dirname` instead of `__dirname`.
 - Migrated `onlyBuiltDependencies` to `allowBuilds` in `pnpm-workspace.yaml`.
+- CI uses pnpm 12, the same major as local development (was pnpm 10, which ignored `allowBuilds`), and updated actions: actions/checkout v7, pnpm/action-setup v6, actions/setup-node v7.
+
+### Security
+
+- pnpm only installs package versions published at least 1 day ago (`minimumReleaseAge: 1440`). With pnpm 12, CI also checks every lockfile entry against it.
 
 ## 2026-03-18
 
